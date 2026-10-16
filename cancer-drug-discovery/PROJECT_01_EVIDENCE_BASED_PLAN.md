@@ -1,34 +1,24 @@
-# Project 1: Reproducible Molecular Bioactivity Prediction
+# Project 1 — Reproducible Cancer Drug Combination Prediction
 
-**Status: planning only. No experiment has been run yet.**
+**Status:** planning; no model training has yet been performed.
+**Literature rule:** use only 2024–2026 research papers as the recommended project literature. See [curated reading list](READING_LIST_2024_2026.md).
 
-## Why this project?
-Learn a real, reproducible drug-discovery ML workflow before moving to drug-combination research. Start with a well-documented cancer-related protein target (candidate: EGFR, subject to checking ChEMBL assay counts, target definition, measurement consistency and usage rights). Avoid implying that enzyme inhibition equals cancer treatment.
+## Anchor research
+- **2025**: *AI-driven discovery of synergistic drug combinations against pancreatic cancer* — https://doi.org/10.1038/s41467-025-56818-6
+- Open research code/data — https://github.com/ncats/PANC1
+- Breast cancer comparison **2025**: *Interpretable prediction of drug synergy for breast cancer by random forest with features from Boolean modeling of signaling pathways* — https://www.nature.com/articles/s41598-025-02444-7 and https://github.com/Ktaoma/LogicForests
 
-## Existing learning examples
-- Kaggle ChEMBL bioactivity notebook: https://www.kaggle.com/code/owaistahir/bioactivity-project-for-drug-discovery-chembl
-- Data Professor open-source bioactivity model demonstration (note older environments may require updating): https://github.com/dataprofessor/bioactivity-prediction-app
-- DeepChem tutorials: https://deepchem.io/tutorials/
-- ChEMBL workshop (EMBL-EBI): https://www.ebi.ac.uk/training/events/chembl-workshop-drug-design/
+## Objective
+Reproduce a documented baseline on published in-vitro drug-pair screening data. Then test whether a different evaluation split or model improves **held-out predictive performance**. Never claim an improved model without a fair comparison.
 
-## Research baseline and papers
-- Wu et al. (2018), MoleculeNet: https://doi.org/10.1039/C7SC02664A
-- Sidorov et al. (2019), Predicting Synergism of Cancer Drug Combinations Using NCI-ALMANAC Data: https://doi.org/10.3389/fchem.2019.00509
+## Implementation sequence
+1. Inspect paper and code; document data sources, screening conditions, licenses and metric definition.
+2. Build a clean table of drug pairs, fingerprints, experimental synergy labels and identifiers.
+3. Reproduce the simplest published baseline; fix seeds and dependency versions.
+4. Implement the baseline independently.
+5. Compare random pair splits with drug-held-out evaluation and explicitly inspect leakage.
+6. Only then evaluate a graph model using the same split, or study stronger 2026 methods.
+7. Publish results and methodological limitations even when the advanced model loses.
 
-## Milestones
-1. **Understand and reproduce:** study the Kaggle notebook. Cite any reused code, and record exact versions and data source.
-2. **Data audit:** query ChEMBL, isolate defensible comparable measurements (e.g. IC50 in nM with explicitly documented relations and assay criteria), identify duplicates, missing values, censored measurements and standardization issues. Freeze a versioned extraction; do not silently mix assay types.
-3. **Baseline:** use RDKit descriptors/fingerprints and a simple regression model. Track metrics (MAE, RMSE, R2), dataset counts and seeds.
-4. **Fair evaluation:** compare random splitting with molecular scaffold splitting, keep the test set held out until final evaluation, and prevent duplicate/scaffold leakage.
-5. **Upgrade:** compare Random Forest with a graph neural network *only after* the baseline is reproducible. Report training cost, uncertainty and failure cases. Improvements must be demonstrated, not claimed.
-6. **Communication:** prepare reproducible code, README, plots, model card and short presentation. A prediction is an assay hypothesis, never a proposed patient treatment.
-
-## Later follow-on (not part of Project 1)
-Reproduce NCI-ALMANAC drug-pair synergy modeling from Sidorov et al. (2019), then evaluate generalization on unseen drug pairs and cell lines. Existing modern comparison code: https://github.com/lcrawlab/cancer-drug-synergy-prediction
-
-## Week 1 checklist
-- [ ] Complete EMBL-EBI ChEMBL introduction: https://www.ebi.ac.uk/training/online/courses/chembl-quick-tour/
-- [ ] Open the Kaggle example, identify its *actual target* and input/output columns (do not assume it already models cancer).
-- [ ] Explain SMILES, target, assay, IC50 and pIC50.
-- [ ] Write a short summary of the MolecularNet paper's random vs scaffold split.
-- [ ] Run first pandas example; write an independent adaptation.
+## Boundaries
+Laboratory cell-line synergy is not clinical efficacy or treatment advice. No identifiable clinical records or employer-confidential data. The published teams' laboratory results are not claims about this portfolio.
