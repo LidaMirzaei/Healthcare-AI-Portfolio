@@ -1,0 +1,32 @@
+name: Pinned Breast Cancer Trial Evidence Review
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'medical-affairs-agents/pinned_trial_review.py'
+      - 'medical-affairs-agents/test_pinned_trial_review.py'
+      - '.github/workflows/pinned-breast-trial-review.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run offline tests
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Retrieve full text for three preselected TROPION-Breast01 articles
+        run: python medical-affairs-agents/pinned_trial_review.py
+      - name: Upload evidence extraction and measured runtime
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinned-breast-trial-evidence-and-timing
+          path: medical-affairs-agents/output/pinned_trial/
+          retention-days: 14
