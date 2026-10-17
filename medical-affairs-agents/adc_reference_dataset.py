@@ -253,6 +253,30 @@ def build_report(seed, findings, seconds):
             f"| {study['endpoint']} ({study['outcome_role']}) "
             f"| {estimate} "
             f"| {v.get('verification_status','UNVERIFIED')} |")
+    out += ["", "## Source verification — separate fields, not a clinical accuracy score", "",
+      "| Study | Original PMID + DOI | Proposed effect and CI in one local expression | Nearest endpoint matches | Trial registration in PubMed |",
+      "|---|---|---|---|---|"]
+    for study in seed["studies"]:
+        v=rows.get(study["pmid"],{})
+        checks=v.get("checks",{})
+        stats=v.get("statistic_context_check",{})
+        original=checks.get("pubmed_identity") and checks.get("source_doi_identity")
+        local=stats.get("full_local_tuple_count",0)>0
+        endpoint=stats.get("endpoint_bound_candidate_count",0)>0
+        registration=checks.get("nct_found_in_abstract") or checks.get("nct_found_in_pubmed_databank")
+        out.append(
+            "| "+study["key"]+
+            " | "+("Yes" if original else "UNVERIFIED")+
+            " | "+("Located" if local else "CI missing or not co-located")+
+            " | "+("Candidate only" if endpoint else "Unconfirmed")+
+            " | "+("Located" if registration else "Needs review")+" |")
+    out += ["",
+      "**Why some rows are still flagged:** DESTINY-Breast03 and DESTINY-Breast05 have an effect/CI pair in the source, but the nearest endpoint is ambiguous in the extracted abstract; DESTINY-Breast04 has no CI bounds in this seed. TROPION-Breast02's abstract ratio and PFS context are located, but its original PubMed trial-registration metadata remains unresolved.",
+      "No row establishes treatment-arm assignment, study quality or verified clinical conclusions.",
+      "",
+      "## High-priority safety and negative-result review",
+      "See [source-linked safety priorities](https://github.com/LidaMirzaei/Healthcare-AI-Portfolio/blob/main/medical-affairs-agents/benchmarks/SAFETY_REVIEW_PRIORITIES.md): lung toxicity, reported fatal events, severe adverse events and prespecified efficacy thresholds. All require original-source clinical review; never rank treatments across different trials from these rates.",
+      ""]
     out += ["", "## Interpretability and comparability warnings",
        "- **Different populations:** HR+/HER2-, HER2-low/ultralow, HER2-positive and TNBC must not be treated as equivalent.",
        "- **Different lines:** first-line metastatic, heavily pretreated metastatic and post-neoadjuvant early disease are not exchangeable.",
@@ -330,6 +354,17 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
       "reference_status":"PROVISIONAL_NOT_EXPERT_ADJUDICATED",
       "study_families":len(seed["studies"]),
       "source_checks_completed":sum("checks" in r for r in results),
+      "source_pmid_doi_matches":sum(
+          r.get("checks",{}).get("pubmed_identity",False) and
+          r.get("checks",{}).get("source_doi_identity",False)
+          for r in results),
+      "local_effect_endpoint_candidates":sum(
+          r.get("checks",{}).get("local_statistic_endpoint_candidate",False)
+          for r in results),
+      "registered_study_ids_from_pubmed":sum(
+          r.get("checks",{}).get("nct_found_in_abstract",False) or
+          r.get("checks",{}).get("nct_found_in_pubmed_databank",False)
+          for r in results),
       "bulk_original_records_returned":len(originals),
       "individual_fallback_requests":fallback_count,
       "strict_local_effect_checks_passed":sum(
@@ -352,6 +387,9 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
         build_report(seed,results,elapsed),encoding="utf-8")
     print("REFERENCE_UNIQUE_FAMILIES",len(seed["studies"]))
     print("REFERENCE_PUBMED_CHECKS",payload["source_checks_completed"])
+    print("REFERENCE_PUBMED_DOI_MATCHES",payload["source_pmid_doi_matches"])
+    print("REFERENCE_COLOCATED_ENDPOINT_CANDIDATES",payload["local_effect_endpoint_candidates"])
+    print("REFERENCE_TRIAL_IDS_FROM_PUBMED",payload["registered_study_ids_from_pubmed"])
     print("REFERENCE_LOCAL_EFFECT_CANDIDATES",payload["strict_local_effect_checks_passed"])
     print("REFERENCE_LOCAL_EFFECT_PLUS_NCBI_REGISTRY",payload["strict_local_effect_plus_pubmed_registry_checks_passed"])
     print("REFERENCE_METADATA_FALLBACK_REQUESTS",fallback_count)
