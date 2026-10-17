@@ -1,0 +1,40 @@
+name: Frozen V5 External PubMed Shadow Challenge (Not Expert Gold)
+
+on:
+  push:
+    paths:
+      - '.github/workflows/frozen-v5-source-shadow.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  once-only-source-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run all synthetic and regression safety tests BEFORE examining shadow outcomes
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Gold-blind PubMed Results predictions on entirely different trial families
+        run: |
+          python medical-affairs-agents/pubmed_shadow_extractor.py \
+            --pmids 40217078 41422862 39660834 41124233 \
+            --out medical-affairs-agents/output/v5_shadow/predictions.json
+      - name: Independently score previously frozen source-only expectations
+        run: |
+          python medical-affairs-agents/evaluate_pubmed_shadow_v5.py \
+            --frozen medical-affairs-agents/benchmarks/SHADOW_V5_FROZEN_SOURCE_LABELS.json \
+            --predictions medical-affairs-agents/output/v5_shadow/predictions.json \
+            --out medical-affairs-agents/output/v5_shadow/
+      - name: Archive predictions, false negatives, every abstention and evaluation caveats
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frozen-v5-shadow-source-evaluation-not-clinical-gold
+          path: medical-affairs-agents/output/v5_shadow/
+          retention-days: 14
