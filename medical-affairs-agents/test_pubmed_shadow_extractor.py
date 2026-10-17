@@ -96,11 +96,22 @@ class GoldBlindPubMedTests(unittest.TestCase):
         article=("Results: The PFS hazard ratio 0.63 (95% CI 0.52-0.76).")
         fake={i:stub(article,pmid=i) for i in ids}
         with patch("pubmed_shadow_extractor.fetch_pmids_batch",return_value=fake) as batch:
-            value=collect(ids)
+            with patch("pubmed_shadow_extractor.fetch_results_batch",return_value={}):
+                value=collect(ids)
         batch.assert_called_once_with(ids)
         self.assertEqual(value["resolved"],2)
         self.assertTrue(all(x["clinical_approval_count"]==0 for x in value["articles"]))
         self.assertNotIn("expected",value)
+
+    def test_original_tagged_results_take_priority_and_exclude_background(self):
+        t=("Background: Prior PFS HR 0.01 (95% CI 0.001-0.02). "
+           "Results: PFS HR 0.63 (95% CI 0.52-0.76).")
+        pubmed_results={"status":"ORIGINAL_PUBMED_XML_RESULTS_TAGGED",
+                        "verified_original_pmid":True,
+                        "results":"PFS HR 0.63 (95% CI 0.52-0.76)."}
+        d=interpret_original_record("99991111",stub(t),pubmed_results)
+        self.assertEqual(d["source_status"],"ORIGINAL_PUBMED_XML_RESULTS_TAGGED")
+        self.assertEqual([c["estimate"] for c in d["candidates"]],[0.63])
 
     def test_no_duplicate_trial_entries(self):
         with self.assertRaises(ValueError):
