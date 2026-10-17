@@ -37,7 +37,8 @@
       "ci_lower": 0.52,
       "ci_upper": 0.76,
       "note": "Primary PFS analysis; OS immature at this publication. Final OS is reported separately from the SAME NCT and must NOT be inferred from PFS.",
-      "related_pmid": "41448362"
+      "related_pmid": "41448362",
+      "expected_doi": "10.1200/jco.24.00920"
     },
     {
       "key": "TROPION-Breast02",
@@ -59,7 +60,10 @@
       "ci_lower": 0.44,
       "ci_upper": 0.73,
       "note": "The reported PFS interval is 99%, not 95%; OS has a distinct 95.01% CI and must be kept separate.",
-      "related_pmid": null
+      "related_pmid": null,
+      "expected_doi": "10.1016/j.annonc.2026.03.008",
+      "additional_regulatory_cross_reference": "https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-datopotamab-deruxtecan-dlnk-unresectable-or-metastatic-triple-negative-breast-cancer",
+      "trial_id_note": "FDA independently identifies TROPION-Breast02 as NCT05374512. The selected PubMed abstract/database record lacked the ID in the automated check; publication linkage remains a manual-review item."
     },
     {
       "key": "DESTINY-Breast03",
@@ -81,7 +85,8 @@
       "ci_lower": 0.22,
       "ci_upper": 0.37,
       "note": "Original randomized comparison; do not mix this early cutoff with the later survival update.",
-      "related_pmid": "38825627"
+      "related_pmid": "38825627",
+      "expected_doi": "10.1056/nejmoa2115022"
     },
     {
       "key": "DESTINY-Breast04",
@@ -103,7 +108,8 @@
       "ci_lower": null,
       "ci_upper": null,
       "note": "HR 0.51 is explicitly for the hormone-receptor-positive HER2-low cohort; CI bounds not stated in this PubMed abstract. Never invent them or attribute subgroup values to the entire trial.",
-      "related_pmid": "41062831"
+      "related_pmid": "41062831",
+      "expected_doi": "10.1056/nejmoa2203690"
     },
     {
       "key": "DESTINY-Breast05",
@@ -126,7 +132,8 @@
       "ci_lower": 0.34,
       "ci_upper": 0.66,
       "note": "Early-stage invasive disease-free survival is NOT metastatic PFS or OS. PubMed lists a subsequent erratum requiring review before any external use.",
-      "related_pmid": "41931063"
+      "related_pmid": "41931063",
+      "expected_doi": "10.1056/nejmoa2514661"
     },
     {
       "key": "DESTINY-Breast06",
@@ -148,7 +155,8 @@
       "ci_lower": 0.52,
       "ci_upper": 0.75,
       "note": "Primary endpoint in HER2-low cohort. HER2-ultralow was an exploratory population, and OS was immature at original cutoff.",
-      "related_pmid": null
+      "related_pmid": null,
+      "expected_doi": "10.1056/nejmoa2407086"
     },
     {
       "key": "DESTINY-Breast09",
@@ -171,7 +179,8 @@
       "ci_lower": 0.44,
       "ci_upper": 0.71,
       "note": "First-line HER2-positive metastatic disease, not comparable with previously treated HER2-low or postoperative outcomes.",
-      "related_pmid": null
+      "related_pmid": null,
+      "expected_doi": "10.1056/nejmoa2508668"
     },
     {
       "key": "ASCENT",
@@ -193,7 +202,8 @@
       "ci_lower": 0.32,
       "ci_upper": 0.52,
       "note": "Primary reported PFS analysis excluded brain metastases; do not generalize primary HR to those patients. Non-Daiichi competitor comparator context.",
-      "related_pmid": null
+      "related_pmid": null,
+      "expected_doi": "10.1056/nejmoa2028485"
     },
     {
       "key": "TROPiCS-02",
@@ -215,7 +225,8 @@
       "ci_lower": 0.65,
       "ci_upper": 0.96,
       "note": "This publication reports OS, a secondary endpoint; primary PFS appeared separately. Do not double-count publications of same NCT.",
-      "related_pmid": null
+      "related_pmid": null,
+      "expected_doi": "10.1016/s0140-6736(23)01245-x"
     },
     {
       "key": "BEGONIA_arm6",
@@ -237,7 +248,9 @@
       "ci_lower": 48.4,
       "ci_upper": 74.5,
       "note": "Single-arm platform trial (arm 6), 58 participants. Protocol threshold 66.6% was NOT met; response rate is not randomized comparative effectiveness. The BEGONIA trial includes other arms and reports.",
-      "related_pmid": "42167437"
+      "related_pmid": "42167437",
+      "expected_doi": "10.1038/s43018-026-01181-8"
     }
-  ]
+  ],
+  "source_identity_policy": "Each primary PMID must independently match its pre-recorded DOI; historical issue dates and online publication dates remain distinct. The 2026 FDA cross-reference for TROPION-Breast02 is NOT substituted for original PubMed registry metadata."
 }
