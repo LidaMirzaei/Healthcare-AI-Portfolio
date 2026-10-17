@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'medical-affairs-agents/clinical_reference_review.py'
+      - 'medical-affairs-agents/adc_reviewer_worksheet.py'
       - 'medical-affairs-agents/test_clinical_reference_review.py'
       - 'medical-affairs-agents/clinical_gold_evaluator_v2.py'
       - 'medical-affairs-agents/test_clinical_gold_evaluator_v2.py'
@@ -41,6 +42,11 @@ jobs:
         run: |
           python medical-affairs-agents/adc_reference_dataset.py \
             --out medical-affairs-agents/output/gold_readiness
+      - name: Generate readable study-by-study Methods, Results and harms review worksheet
+        run: |
+          python medical-affairs-agents/adc_reviewer_worksheet.py \
+            --audit medical-affairs-agents/output/gold_readiness/adc_source_audit.json \
+            --out medical-affairs-agents/output/gold_readiness/adc_independent_review_worksheet.md
       - name: Create ten provisional outcome-review units and thirty mandatory tasks
         run: |
           python medical-affairs-agents/clinical_reference_review.py prepare \
