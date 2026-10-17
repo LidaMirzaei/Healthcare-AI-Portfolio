@@ -1,0 +1,30 @@
+name: Frozen V3 Breast Oncology Effect Evaluation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/frozen-clinical-effect-v3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prospective-v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run complete offline unit suite
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Run frozen V3 on previously unused independent article families
+        run: python medical-affairs-agents/evaluate_effect_holdout_v3.py
+      - name: Save V3 frozen score and source audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frozen-v3-effect-candidates-and-scorecard
+          path: medical-affairs-agents/output/v3_effect_holdout/
+          retention-days: 14
