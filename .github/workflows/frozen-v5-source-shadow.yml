@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
       - name: Validate gold-blind parser with synthetic tests before first external scoring
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
-      - name: Repeat consumed V5 after switching to original PubMed XML Results (regression only)
+      - name: V5 regression after separating DOI identity and adding safe CI parse diagnostics
         run: |
           python medical-affairs-agents/pubmed_shadow_extractor.py \
             --pmids 40217078 41422862 39660834 41124233 \
