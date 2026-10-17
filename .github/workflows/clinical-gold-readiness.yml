@@ -1,0 +1,62 @@
+name: Oncology Gold-Standard Readiness (No Clinical Scores)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'medical-affairs-agents/clinical_reference_review.py'
+      - 'medical-affairs-agents/test_clinical_reference_review.py'
+      - 'medical-affairs-agents/validate_reserved_holdout.py'
+      - 'medical-affairs-agents/test_validate_reserved_holdout.py'
+      - 'medical-affairs-agents/benchmarks/RESERVED_V4_TRIAL_FAMILIES.json'
+      - 'medical-affairs-agents/benchmarks/ADC_REFERENCE_CANDIDATES_V1.json'
+      - '.github/workflows/clinical-gold-readiness.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Full offline safety and review-workflow tests
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Confirm different and unscored reserved study families
+        run: |
+          python medical-affairs-agents/validate_reserved_holdout.py \
+            --seed medical-affairs-agents/benchmarks/ADC_REFERENCE_CANDIDATES_V1.json \
+            --reserved medical-affairs-agents/benchmarks/RESERVED_V4_TRIAL_FAMILIES.json \
+            --out medical-affairs-agents/output/gold_readiness/holdout_isolation.json
+      - name: Retrieve original public PubMed metadata, never licensed full-text
+        run: |
+          python medical-affairs-agents/adc_reference_dataset.py \
+            --out medical-affairs-agents/output/gold_readiness
+      - name: Create ten provisional outcome-review units and thirty mandatory tasks
+        run: |
+          python medical-affairs-agents/clinical_reference_review.py prepare \
+            --seed medical-affairs-agents/benchmarks/ADC_REFERENCE_CANDIDATES_V1.json \
+            --audit medical-affairs-agents/output/gold_readiness/adc_source_audit.json \
+            --reserved medical-affairs-agents/benchmarks/RESERVED_V4_TRIAL_FAMILIES.json \
+            --out medical-affairs-agents/output/gold_readiness/reference_review_queue.json
+      - name: Generate entirely blank independent-review submission templates
+        run: |
+          python medical-affairs-agents/clinical_reference_review.py template \
+            --queue medical-affairs-agents/output/gold_readiness/reference_review_queue.json \
+            --reviewer-id REVIEWER_A_UNASSIGNED \
+            --out medical-affairs-agents/output/gold_readiness/reviewer_A_BLANK.json
+          python medical-affairs-agents/clinical_reference_review.py template \
+            --queue medical-affairs-agents/output/gold_readiness/reference_review_queue.json \
+            --reviewer-id REVIEWER_B_UNASSIGNED \
+            --out medical-affairs-agents/output/gold_readiness/reviewer_B_BLANK.json
+      - name: Archive traceable review work, not manufactured clinical gold
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: breast-oncology-two-reviewer-readiness-not-gold
+          path: medical-affairs-agents/output/gold_readiness/
+          retention-days: 14
