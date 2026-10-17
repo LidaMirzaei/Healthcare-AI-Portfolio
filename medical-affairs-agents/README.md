@@ -41,3 +41,9 @@ A reliable retrieval + citation + human-review baseline must come first. Once we
 Reference: [NCBI E-Utilities](https://www.ncbi.nlm.nih.gov/books/NBK25499/).
 
 **Note:** This repo is public. Do not commit corporate data or secrets.
+
+## Zero-cost operating rule
+
+See [COST_AND_PRIVACY_POLICY.md](COST_AND_PRIVACY_POLICY.md). No paid model API or billing account is required to run this prototype. The public-repository workflow uses GitHub's standard runner and retrieves at most ten public PubMed records per scheduled execution. Any step needing paid credits must stop for explicit owner approval.
+
+The [weekly workflow](../.github/workflows/weekly-oncology-brief.yml) runs each Monday, but the live retrieval step has **not yet been verified as successful**. A successful offline CI run is not proof of successful live PubMed retrieval.
