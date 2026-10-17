@@ -1,0 +1,73 @@
+{
+  "schema": "reserved-clinical-outcome-holdout-v1",
+  "created_date": "2026-10-17",
+  "status": "RESERVED_NOT_EVALUATED_NOT_GOLD",
+  "purpose": "Independent study-family validation after code freeze and two independent medically qualified reviewers. No outcome estimates, labels, predicted outputs or assessment results belong here.",
+  "leakage_policy": "Group by underlying NCT family, including subgroup, final OS, safety and earlier/updated publications. Any overlap with all prior V1/V2/V3 heldouts, development papers and known trial families must block use as new unseen evaluation.",
+  "evaluation_not_ready_reasons": [
+    "No two-reviewer adjudicated gold labels",
+    "Article availability and permitted rights must be checked separately",
+    "No frozen complete clinical outcome labels or negative outcomes",
+    "No pre-registered metrics/sampling selection bias assessment"
+  ],
+  "developer_exposure_note": "Trial identity and some abstract findings were visible during planning. This is a prospective reserved study-family pool, NOT fully blinded data; future high-confidence final validation should use a separately selected independent corpus.",
+  "contains_outcome_values": false,
+  "studies": [
+    {
+      "trial_family_id": "NCT05382286",
+      "label": "ASCENT-04/KEYNOTE-D19",
+      "pmid": "41564397",
+      "doi": "10.1056/NEJMoa2508959",
+      "study_type": "randomized_phase_3",
+      "category": "ADC randomized comparator",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/41564397/"
+    },
+    {
+      "trial_family_id": "NCT04739761",
+      "label": "DESTINY-Breast12",
+      "pmid": "39271844",
+      "doi": "10.1038/s41591-024-03261-7",
+      "study_type": "prospective_single_arm_cohorts",
+      "category": "ADC single arm with distinct CNS and non-CNS cohorts",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/39271844/"
+    },
+    {
+      "trial_family_id": "NCT04964934",
+      "label": "SERENA-6",
+      "pmid": "40454637",
+      "doi": "10.1056/NEJMoa2502929",
+      "study_type": "randomized_phase_3",
+      "category": "non-ADC method and endpoint generalization",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/40454637/"
+    },
+    {
+      "trial_family_id": "NCT04305496",
+      "label": "CAPItello-291",
+      "pmid": "37256976",
+      "doi": "10.1056/NEJMoa2214131",
+      "study_type": "randomized_phase_3",
+      "category": "non-ADC biomarker subgroup and comparator test",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/37256976/"
+    },
+    {
+      "trial_family_id": "NCT02947685",
+      "label": "PATINA",
+      "pmid": "41604639",
+      "doi": "10.1056/NEJMoa2511218",
+      "study_type": "randomized_phase_3",
+      "category": "non-ADC combination safety and efficacy",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/41604639/"
+    },
+    {
+      "trial_family_id": "NCT04191499",
+      "label": "INAVO120",
+      "pmid": "40454641",
+      "doi": "10.1056/NEJMoa2501796",
+      "study_type": "randomized_phase_3",
+      "category": "non-ADC OS versus PFS and updated cutoff",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/40454641/"
+    }
+  ],
+  "reviewers": "Unassigned; no ratings or results inspected for gold, and no source content may be exported to public CI",
+  "evaluation_policy": "Do not run outcome scoring until research code and gold annotations are frozen and signed off by independent domain reviewers outside this repository."
+}
