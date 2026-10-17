@@ -88,7 +88,7 @@ class ADCReferenceTests(unittest.TestCase):
     def test_packet_emphasizes_endpoint_and_population(self):
         draft=build_report(SEED,[],0.001)
         self.assertIn("not comparable effect sizes",draft)
-        self.assertIn("Single-arm",draft)
+        self.assertIn("single-arm",draft)
         self.assertIn("99%",draft)
         self.assertIn("NOT a gold standard",draft)
     def test_modified_ci_outside_estimate_rejected(self):
