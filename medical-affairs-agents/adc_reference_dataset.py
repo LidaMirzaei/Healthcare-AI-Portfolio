@@ -96,6 +96,39 @@ def fetch_pmid(pmid):
         raise LookupError("Original PubMed record not uniquely resolved")
     return original[0]
 
+def select_batched_originals(payload, required_pmids):
+    """Return ONLY unique exact PubMed-origin records from a batch response."""
+    required=set(required_pmids)
+    if len(required)!=len(required_pmids):
+        raise ValueError("Duplicate PMID requested")
+    grouped={}
+    for item in payload.get("resultList",{}).get("result",[]):
+        pmid=str(item.get("id",""))
+        if pmid not in required or item.get("source")!="MED":
+            continue
+        if pmid in grouped:
+            raise ValueError("Ambiguous duplicate PubMed source: "+pmid)
+        grouped[pmid]=item
+    return grouped
+
+
+def fetch_pmids_batch(pmids):
+    """One bounded Europe PMC metadata request for up to 20 original PMIDs.
+
+    Falls back only for missing records, not for ambiguous matches.
+    """
+    if not pmids or len(pmids)>20 or any(not PMID.fullmatch(p) for p in pmids):
+        raise ValueError("Invalid PubMed metadata batch input")
+    terms=" OR ".join("EXT_ID:"+p for p in pmids)
+    params=urllib.parse.urlencode({
+        "query":"("+terms+") AND SRC:MED","format":"json",
+        "resultType":"core","pageSize":str(len(pmids)+2)})
+    req=urllib.request.Request(BASE+"?"+params,
+        headers={"User-Agent":"PublicOncologyReferenceSourceAudit/1.0"})
+    with urllib.request.urlopen(req,timeout=30) as response:
+        return select_batched_originals(json.load(response),pmids)
+
+
 def parse_ncbi_trial_registrations(xml_bytes):
     """Extract only trial IDs from structured original PubMed databank entries."""
     root=ET.fromstring(xml_bytes)
@@ -250,9 +283,20 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
     check_reference_schema(seed)
     start=time.perf_counter()
     results=[]
+    pmids=[study["pmid"] for study in seed["studies"]]
+    try:
+        originals=fetch_pmids_batch(pmids)
+        print("REFERENCE_BULK_RECORDS",len(originals),"/",len(pmids))
+    except (LookupError,OSError,ValueError,TimeoutError) as exc:
+        originals={}
+        print("REFERENCE_BULK_UNAVAILABLE",type(exc).__name__)
+    fallback_count=0
     for study in seed["studies"]:
         try:
-            record=fetch_pmid(study["pmid"])
+            record=originals.get(study["pmid"])
+            if record is None:
+                fallback_count+=1
+                record=fetch_pmid(study["pmid"])
             result=evaluate_source(study,record)
             if not result["checks"]["nct_found_in_abstract"]:
                 # Original PubMed's ClinicalTrials.gov databank registration
@@ -286,6 +330,8 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
       "reference_status":"PROVISIONAL_NOT_EXPERT_ADJUDICATED",
       "study_families":len(seed["studies"]),
       "source_checks_completed":sum("checks" in r for r in results),
+      "bulk_original_records_returned":len(originals),
+      "individual_fallback_requests":fallback_count,
       "strict_local_effect_checks_passed":sum(
           r["verification_status"]=="ABSTRACT_LOCAL_STATISTIC_CANDIDATE_REVIEW_REQUIRED"
           for r in results),
@@ -308,6 +354,7 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
     print("REFERENCE_PUBMED_CHECKS",payload["source_checks_completed"])
     print("REFERENCE_LOCAL_EFFECT_CANDIDATES",payload["strict_local_effect_checks_passed"])
     print("REFERENCE_LOCAL_EFFECT_PLUS_NCBI_REGISTRY",payload["strict_local_effect_plus_pubmed_registry_checks_passed"])
+    print("REFERENCE_METADATA_FALLBACK_REQUESTS",fallback_count)
     print("REFERENCE_RUNTIME_SECONDS",round(elapsed,3))
     return payload
 
