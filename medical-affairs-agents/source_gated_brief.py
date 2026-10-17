@@ -155,7 +155,7 @@ def reviewer_questions():
     ]
 
 
-def brief_markdown(released, blocked, structures, elapsed):
+def brief_markdown(released, blocked, structures, elapsed, os_abstract_audit=None):
     lines=[
       "# TROPION-Breast01 — Source-Gated Evidence Brief (research prototype)",
       "",
@@ -189,6 +189,9 @@ def brief_markdown(released, blocked, structures, elapsed):
       f"{OS_SOURCE['value']}. {OS_SOURCE['interpretation']}",
       f"**Provenance warning:** {OS_SOURCE['status']}. The original [final OS publication]({OS_SOURCE['url']}) was checked separately, but its publisher full text has NOT been automatically ingested by this run.",
       "Do not treat the primary PFS report's earlier, immature OS analysis as the final outcome.",
+      "**Original final-OS abstract cross-check:** " +
+        (os_abstract_audit or {}).get("status", "NOT_RUN") +
+        ". This verifies at most public abstract metadata; the complete final OS article remains outside XML ingestion.",
       "",
     ]
     if "safety_grade3" in accepted:
@@ -309,8 +312,10 @@ def run(output_dir):
         safe_tables[key]={k:v for k,v in s.items() if k!="tables"}
         safe_tables[key]["tables"]=[{k:v for k,v in t.items() if k!="row_data"} for t in s["tables"]]
     (dest/"table_structure_audit.json").write_text(json.dumps(safe_tables,indent=2),encoding="utf-8")
+    os_audit_path = dest / "final_os_primary_abstract_audit.json"
+    os_audit = json.loads(os_audit_path.read_text(encoding="utf-8")) if os_audit_path.exists() else None
     (dest/"source_gated_executive_brief.md").write_text(
-        brief_markdown(released,blocked,structures,elapsed),encoding="utf-8")
+        brief_markdown(released,blocked,structures,elapsed,os_audit),encoding="utf-8")
     print("SOURCE_CONTEXT_MATCHED",len(released),"BLOCKED",len(blocked))
     for a in audited: print("CLAIM_CHECK",a["id"],a["status"])
     print("BRIEF_AUTOMATED_SECONDS",round(elapsed,3))
