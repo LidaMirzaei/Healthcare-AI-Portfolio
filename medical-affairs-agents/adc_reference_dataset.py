@@ -56,7 +56,7 @@ def check_reference_schema(root):
         seen_pmids.add(rec["pmid"])
         seen_trials.add(rec["nct"])
         for field in ("key","year","drug","design","subtype","setting","line",
-                      "intervention","endpoint","measure","outcome_role","note"):
+                      "intervention","endpoint","measure","outcome_role","note","expected_doi"):
             if not rec.get(field):
                 raise ValueError(f"Missing field {field} in {rec.get('key')}")
         if rec["subtype"] not in BIOMARKER_GROUPS or rec["endpoint"] not in SAFE_KEYS:
@@ -132,6 +132,7 @@ def evaluate_source(seed, record):
     title=norm(record.get("title"))
     observed_pmid=str(record.get("id",""))
     pmid_ok=observed_pmid==seed["pmid"] and record.get("source","MED")=="MED"
+    doi_ok=norm(record.get("doi")).lower().strip()==seed["expected_doi"].lower().strip()
     nct_ok=bool(re.search(r"(?<!\w)"+re.escape(seed["nct"])+r"(?!\w)",abstract,re.I))
     # Regulatory and statistical outputs need manual verification even if all
     # their numbers occur nearby, because association to comparator isn't proven.
@@ -147,7 +148,7 @@ def evaluate_source(seed, record):
     # Some abstracts omit trial IDs or particular CI bounds; mark incomplete.
     # Never convert incomplete metadata to a fabricated positive finding.
     status=("ABSTRACT_NUMBER_TOKENS_LOCATED_REVIEW_REQUIRED"
-            if pmid_ok and nct_ok and found and ci_ok else
+            if pmid_ok and doi_ok and nct_ok and found and ci_ok else
             "ABSTRACT_SOURCE_CHECK_INCOMPLETE_REVIEW_REQUIRED")
     # Records deliberately exclude copied abstracts/source full text.
     return {
@@ -157,7 +158,8 @@ def evaluate_source(seed, record):
         "source_title":title,"source_doi":record.get("doi"),
         "source_published":record.get("firstPublicationDate") or record.get("firstIndexDate"),
         "verification_status":status,
-        "checks":{"pubmed_identity":pmid_ok,"nct_found_in_abstract":nct_ok,
+        "checks":{"pubmed_identity":pmid_ok,"source_doi_identity":doi_ok,
+                  "nct_found_in_abstract":nct_ok,
                   "estimate_number_token_found":found,**ci_parts},
         "endpoint_label_provisional":seed["endpoint"],
         "effect_measure_provisional":seed["measure"],
@@ -217,7 +219,7 @@ def build_report(seed, findings, seconds):
        "- **BEGONIA arm 6 is single-arm:** its ORR does not establish benefit versus another treatment; its prespecified response objective was not met.",
        "- **DESTINY-Breast04:** the selected HR refers to the HR-positive HER2-low subgroup, not the entire population; the chosen abstract lacks CI bounds.",
        "- **DESTINY-Breast05:** the source lists an erratum requiring review and studies early disease rather than metastatic survival.",
-       "- **TROPION-Breast02:** the PFS CI level is reported as 99%, not 95%; OS uses a different, unusual level (95.01%).",
+       "- **TROPION-Breast02:** the PFS CI level is reported as 99%, not 95%; OS uses a different, unusual level (95.01%). FDA separately identifies NCT05374512, while this PubMed registry metadata check remains unresolved.",
        "- **TROPION-Breast01:** final OS must be checked in the later paper from the same NCT, not inferred from the earlier PFS result.",
        "",
        "## Requirements to move from candidates to a legitimate gold standard",
@@ -253,7 +255,8 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
                         "NCBI_PUBMED_CLINICALTRIALS_DATABANK" if verified else
                         "PENDING_SOURCE_REVIEW")
                     if verified and all(result["checks"][k] for k in (
-                        "pubmed_identity","estimate_number_token_found",
+                        "pubmed_identity","source_doi_identity",
+                        "estimate_number_token_found",
                         "ci_level","ci_lower","ci_upper")):
                         result["verification_status"]=(
                             "ABSTRACT_NUMBERS_AND_NCBI_REGISTRY_LOCATED_REVIEW_REQUIRED")
