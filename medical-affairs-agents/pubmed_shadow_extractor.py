@@ -79,7 +79,12 @@ def contextual_endpoint(results, ratio_start):
     # If two different endpoints are adjacent (PFS and OS in same phrase)
     # do not arbitrarily assign an effect to the last one.
     if len(matches)>1 and matches[-2][1]!=best[1] and (best[2]-matches[-2][0])<20:
-        return "AMBIGUOUS_MULTIPLE_ENDPOINTS"
+        # "PFS and OS" is genuinely ambiguous. But "PFS HR 0.70 and
+        # OS HR 0.50" carries two separate effect statistics and the
+        # second endpoint is explicit; do not abstain on this case.
+        between=prefix[matches[-2][0]:best[2]]
+        if not re.search(r"\b(?:HR|OR|hazard\s+ratio|odds\s+ratio)\b",between,re.I):
+            return "AMBIGUOUS_MULTIPLE_ENDPOINTS"
     return best[1]
 
 
