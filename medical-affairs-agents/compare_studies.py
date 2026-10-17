@@ -8,12 +8,12 @@ from pathlib import Path
 from fulltext_evidence import fetch,search,parse_xml
 
 FIELDS = {
-    "study_design": re.compile(r"\\b(?:randomized|randomised|prospective|retrospective|phase [I,V]+|cohort|case.control)\\b", re.I),
-    "sample_size": re.compile(r"\\b(?:[0-9][0-9,]* patients|[0-9][0-9,]* participants|enrolled [0-9][0-9,]*)\\b",re.I),
-    "endpoint": re.compile(r"\\b(?:primary endpoint|primary outcome|overall survival|progression.free survival|disease.free survival)\\b",re.I),
-    "effect_estimate": re.compile(r"\\b(?:hazard ratio|odds ratio|risk ratio|95% CI|95% confidence interval)\\b",re.I),
-    "safety": re.compile(r"\\b(?:adverse events?|toxicit(?:y|ies)|interstitial lung disease|serious adverse)\\b",re.I),
-    "limitations": re.compile(r"\\b(?:limitations?|confounding|bias|generalizab|small sample)\\b",re.I),
+    "study_design": re.compile(r"\b(?:randomized|randomised|prospective|retrospective|phase [I,V]+|cohort|case.control)\b", re.I),
+    "sample_size": re.compile(r"\b(?:[0-9][0-9,]* patients|[0-9][0-9,]* participants|enrolled [0-9][0-9,]*)\b",re.I),
+    "endpoint": re.compile(r"\b(?:primary endpoint|primary outcome|overall survival|progression.free survival|disease.free survival)\b",re.I),
+    "effect_estimate": re.compile(r"\b(?:hazard ratio|odds ratio|risk ratio|95% CI|95% confidence interval)\b",re.I),
+    "safety": re.compile(r"\b(?:adverse events?|toxicit(?:y|ies)|interstitial lung disease|serious adverse)\b",re.I),
+    "limitations": re.compile(r"\b(?:limitations?|confounding|bias|generalizab|small sample)\b",re.I),
 }
 
 def candidate_matrix(document, max_candidates=2):
@@ -23,7 +23,7 @@ def candidate_matrix(document, max_candidates=2):
         for section,paragraphs in document["sections"].items():
             for paragraph in paragraphs:
                 # Splits may mishandle abbreviations. Excerpts must be verified at source.
-                sentences=re.split(r"(?<=[.!?])\\s+(?=[A-Z])",paragraph["text"])
+                sentences=re.split(r"(?<=[.!?])\s+(?=[A-Z])",paragraph["text"])
                 for sentence in sentences:
                     if pattern.search(sentence):
                         candidates.append({"paragraph_id":paragraph["id"],"section":paragraph["heading"],
@@ -65,7 +65,7 @@ def render_matrix(entries):
         "5. Did the article include corrections, supplementary material or a data-access restriction?",
         "",
         "No comparative efficacy, recommendation, or strength-of-evidence ranking is generated automatically."]
-    return "\\n".join(lines)+"\\n"
+    return "\n".join(lines)+"\n"
 
 def main():
     p=argparse.ArgumentParser()
