@@ -38,17 +38,16 @@ def authorize_license(value):
 
 def fetch_metadata(pmcid):
     query=urllib.parse.urlencode({
-        "query":f"EXT_ID:{pmcid} AND SRC:PMC",
+        "query":f"PMCID:{pmcid}",
         "format":"json","resultType":"core","pageSize":"2"})
     req=urllib.request.Request(ROOT+"?"+query,
         headers={"User-Agent":"OncologyRightsPreflight/1.0"})
     with urllib.request.urlopen(req,timeout=30) as res:
         payload=json.load(res)
     matches=payload.get("resultList",{}).get("result",[])
-    # Some Europe PMC source records have id=PMCID without SRC=PMC;
-    # no manual fallback here: missing identity => stop.
-    matching=[x for x in matches if x.get("pmcid")==pmcid or
-              (x.get("id")==pmcid and x.get("source")=="PMC")]
+    # PubMed-indexed records are often SRC:MED with a separate PMCID, not
+    # SRC:PMC. Resolve by the PMCID field and verify DOI independently.
+    matching=[x for x in matches if x.get("pmcid")==pmcid]
     if len(matching)!=1:
         return {"pmcid":pmcid,"rights_status":"BLOCKED_UNVERIFIED_METADATA",
                 "license":None,"metadata_match_count":len(matching)}
