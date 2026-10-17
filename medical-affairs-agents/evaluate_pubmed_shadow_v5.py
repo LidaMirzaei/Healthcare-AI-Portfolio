@@ -45,7 +45,8 @@ def score(predictions, frozen):
     checked=[];total_candidates=0;total_abstained=0;source_identity_pass=0; results_section_count=0
     for source in src:
         record=docs[source["pmid"]]
-        identity=(record.get("doi","").lower()==source["doi"].lower())
+        identity=(record.get("doi","").lower()==source["doi"].lower()
+                  and record.get("source_status")!="BLOCKED_ORIGINAL_PUBMED_MISSING")
         recognized_results=record.get("source_status") in (
             "ABSTRACT_RESULTS_ONLY","ORIGINAL_PUBMED_XML_RESULTS_TAGGED")
         source_identity_pass+=int(identity)
