@@ -207,7 +207,8 @@ def brief_markdown(released, blocked, structures, elapsed):
     ]
     spec_by_id={s["id"]:s for s in CLAIMS}
     for s in CLAIMS:
-        a=next(x for x in released+blocked if x["id"]==s["id"])
+        a=next((x for x in released+blocked if x["id"]==s["id"]),
+               {"id":s["id"],"status":"BLOCKED_NOT_EVALUATED","candidates":[]})
         link="; ".join(f"[{c['paragraph_id']}]({c['link']})" for c in a.get("candidates",[])) or "NONE"
         lines.append(f"| {s['endpoint']} | {s['value']} | {a['status']} | {link} |")
     lines += ["","## Benefits, harms and limits — grounded interpretation rules",
