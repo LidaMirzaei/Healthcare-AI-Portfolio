@@ -117,3 +117,18 @@ Step 1 of the clinical evidence accuracy project now has **10 independent origin
 
 **Next rigorous step:** two qualified reviewers independently annotate endpoints, intervention/control arms, confidence interval level, population, harms, methods and limitations from original permitted full text; adjudicate disagreements; then evaluate on **fresh study-family-disjoint unseen sources**. See [gold evaluation guide](benchmarks/TWO_REVIEWER_GOLD_EVALUATION_GUIDE.md).
 
+
+
+### Quality audit and speed improvement — October 17, 2026
+
+The ten original ADC paper-development references have been re-audited for scientific source identity, numerical provenance and misleading endpoint attribution. Read [the full mistakes-and-fixes log](benchmarks/AUDIT_2026_10_17.md) and [source-linked safety priorities](benchmarks/SAFETY_REVIEW_PRIORITIES.md).
+
+- **Bug corrected:** Numbers that merely occurred somewhere in the same abstract (e.g., HR from one endpoint, CI from another) no longer suffice. [abstract_statistic_verifier.py](abstract_statistic_verifier.py) requires locally attached point estimate and CI, checks CI confidence level **including 99% and 95.01%**, and reports whether the *nearest explicitly named endpoint* matches. These are candidate source checks, never accepted clinical conclusions.
+- **Corrected scientific metadata:** TROPION-Breast02 has **dual primary** PFS and OS endpoints, not an uncertain hierarchy; other trials' endpoint and population ambiguities remain flagged.
+- **Safety prioritized:** Pulmonary toxicities, fatal ILD cases, severe adverse events and BEGONIA's missed prespecified efficacy objective have individual original-source research-review links. They are not a cross-trial comparative safety ranking.
+- **Speed:** ten serial Europe PMC metadata requests were consolidated to **one bounded, identity-checked batch call** with fallback for missing PMIDs. Observed original serial 10.955 s vs recent 2.819/2.918/3.186 s; network timing is variable and excludes all human scientific review.
+- **Latest source audit:** [GitHub Actions run 39013783455](https://github.com/LidaMirzaei/Healthcare-AI-Portfolio/actions/runs/39013783455), **152/152** Python tests, 10/10 original PMID and DOI identities matched, **7/10** local estimate/CI/endpoint candidate matches, **9/10** PubMed-linked trial registries. The two missing endpoint linkages (DESTINY-Breast03/05), one missing CI (DESTINY-Breast04), and TROPION-Breast02's unresolved original PMID-to-trial registry linkage are visibly flagged. They must **not** be auto-filled.
+- **Hard-fail gate:** one wrong or unavailable original PMID+DOI now fails the online audit, even when the remaining studies look fine. Earlier V2/V3 scores are preserved, and these 10 papers remain a **development set**, not a future unseen evaluation set.
+
+**Scientific precision and recall are still unmeasured.** Green software tests, endpoint candidates and PubMed metadata checks are not independently adjudicated full-text scientific outcomes. Two medically qualified independent reviewers and a new study-family-disjoint holdout will be required before claiming clinical performance.
+
