@@ -1,6 +1,9 @@
 name: Weekly Public Oncology Research Brief
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/weekly-oncology-brief.yml'
   schedule:
     - cron: '17 13 * * 1'
 
