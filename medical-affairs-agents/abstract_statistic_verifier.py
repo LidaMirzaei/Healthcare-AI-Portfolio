@@ -29,6 +29,8 @@ CI = (r"(?P<level>9[059](?:\.\d{1,2})?)\s*%\s*"
       r"(?P<high>\d+(?:\.\d+)?)")
 RATIO = re.compile(
     r"\b(?P<measure>hazard[\s-]+ratio|odds[\s-]+ratio|HR|OR)\b"
+    r"(?:\s*[\(\[]\s*(?:HR|OR)\s*[\)\]])?"
+    r"(?:\s+for\s+[A-Za-z][A-Za-z\s\-]{0,76})?"
     r"\s*(?:[,;:=]|\bof\b|\bis\b|\s)*"
     r"(?P<point>\d+(?:\.\d+)?)"
     r"(?P<gap>.{0,90}?)"
@@ -43,7 +45,7 @@ ENDPOINT_LABELS = {
     "PFS": re.compile(r"\b(?:progression[\s-]?free survival|PFS)\b",re.I),
     "OS": re.compile(r"\b(?:overall survival|OS)\b",re.I),
     "iDFS": re.compile(r"\b(?:invasive[\s-]?disease[\s-]?free survival|iDFS)\b",re.I),
-    "DFS": re.compile(r"\b(?:disease[\s-]?free survival|DFS)\b",re.I),
+    "DFS": re.compile(r"\bDFS\b|(?<!invasive[ -])\bdisease[\s-]?free survival\b",re.I),
     "ORR": re.compile(r"\b(?:objective response rate|ORR)\b",re.I),
     "EFS": re.compile(r"\b(?:event[\s-]?free survival|EFS)\b",re.I),
     "pCR": re.compile(r"\b(?:patholog(?:ic|ical)\s+complete response|pCR)\b",re.I),
@@ -114,6 +116,8 @@ def verify_local_result(abstract, *, measure, estimate, ci_level,
         # Direct statement of ratio number, no invented confidence interval.
         simple=re.compile(
             r"\b(?:hazard[\s-]+ratio|odds[\s-]+ratio|HR|OR)\b"
+            r"(?:\s*[\(\[]\s*(?:HR|OR)\s*[\)\]])?"
+            r"(?:\s+for\s+[A-Za-z][A-Za-z\s\-]{0,76})?"
             r"\s*(?:[,;:=]|\bof\b|\bis\b|\s)*"
             r"(?P<point>\d+(?:\.\d+)?)",re.I)
         candidates=[]
