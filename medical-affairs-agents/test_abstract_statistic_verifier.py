@@ -60,6 +60,29 @@ class LocalityTests(unittest.TestCase):
     def test_no_partial_number(self):
         x=audit("PFS HR 10.63 (95% CI 0.52-0.76).")
         self.assertFalse(x["matched"])
+    def test_original_trial_hazard_ratio_for_progression_or_death(self):
+        x=audit("The median progression-free survival was longer with drug A "
+                "(hazard ratio for disease progression or death from any cause, "
+                "0.63; 95% CI, 0.52 to 0.76).")
+        self.assertEqual(x["endpoint_bound_candidate_count"],1)
+
+    def test_original_trial_hr_alias_in_parentheses(self):
+        x=audit("In patients with PFS events, the hazard ratio (HR), "
+                "0.63 [95% confidence interval (CI), 0.52 to 0.76].")
+        self.assertEqual(x["full_local_tuple_count"],1)
+
+    def test_invasive_disease_free_survival_not_mislabeled_dfs(self):
+        x=check("Patients with invasive disease-free survival events "
+                "(hazard ratio, 0.47; 95% CI 0.34 to 0.66).",
+                measure="HR",estimate=0.47,ci_level=95,
+                ci_lower=0.34,ci_upper=0.66,endpoint="iDFS")
+        self.assertEqual(x["endpoint_bound_candidate_count"],1)
+        y=check("Patients with invasive disease-free survival events "
+                "(hazard ratio, 0.47; 95% CI 0.34 to 0.66).",
+                measure="HR",estimate=0.47,ci_level=95,
+                ci_lower=0.34,ci_upper=0.66,endpoint="DFS")
+        self.assertEqual(y["endpoint_bound_candidate_count"],0)
+
     def test_missing_sources_never_are_clinically_verified(self):
         x=audit("PFS hazard ratio 0.63 (95% confidence interval, 0.52–0.76)")
         self.assertIs(x["human_adjudicated"],False)
