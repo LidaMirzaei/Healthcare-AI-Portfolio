@@ -1,4 +1,4 @@
-name: Frozen V5 External PubMed Shadow Challenge (Not Expert Gold)
+name: V5 Source Shadow Regression — Labels Already Seen (Not Clinical Gold)
 
 on:
   push:
@@ -20,12 +20,12 @@ jobs:
           python-version: '3.11'
       - name: Validate gold-blind parser with synthetic tests before first external scoring
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
-      - name: Gold-blind PubMed Results predictions on entirely different trial families
+      - name: Repeat consumed V5 after switching to original PubMed XML Results (regression only)
         run: |
           python medical-affairs-agents/pubmed_shadow_extractor.py \
             --pmids 40217078 41422862 39660834 41124233 \
             --out medical-affairs-agents/output/v5_shadow/predictions.json
-      - name: Independently score previously frozen source-only expectations
+      - name: Compare with unchanged frozen V5 original source tuples — regression only
         run: |
           python medical-affairs-agents/evaluate_pubmed_shadow_v5.py \
             --frozen medical-affairs-agents/benchmarks/SHADOW_V5_FROZEN_SOURCE_LABELS.json \
