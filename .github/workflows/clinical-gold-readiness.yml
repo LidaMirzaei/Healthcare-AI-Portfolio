@@ -6,6 +6,9 @@ on:
     paths:
       - 'medical-affairs-agents/clinical_reference_review.py'
       - 'medical-affairs-agents/test_clinical_reference_review.py'
+      - 'medical-affairs-agents/clinical_gold_evaluator_v2.py'
+      - 'medical-affairs-agents/test_clinical_gold_evaluator_v2.py'
+      - 'medical-affairs-agents/benchmarks/GOLD_REVIEW_PROTOCOL.md'
       - 'medical-affairs-agents/validate_reserved_holdout.py'
       - 'medical-affairs-agents/test_validate_reserved_holdout.py'
       - 'medical-affairs-agents/benchmarks/RESERVED_V4_TRIAL_FAMILIES.json'
