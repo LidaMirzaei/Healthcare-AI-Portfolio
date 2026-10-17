@@ -20,7 +20,7 @@ def fake_record(seed, abstract=None):
                   f"hazard ratio {value}{ci} with results from analyzed participants.")
     return {"id":seed["pmid"],"source":"MED",
             "title":"Original clinical investigation with findings",
-            "doi":"10.1234/example","firstPublicationDate":"2025-01-01",
+            "doi":seed["expected_doi"],"firstPublicationDate":"2025-01-01",
             "abstractText":abstract}
 
 
@@ -78,6 +78,14 @@ class ADCReferenceTests(unittest.TestCase):
         item=evaluate_source(study,wrong)
         self.assertFalse(item["checks"]["pubmed_identity"])
         self.assertIn("INCOMPLETE",item["verification_status"])
+    def test_original_doi_mismatch_is_not_accepted(self):
+        study=SEED["studies"][0]
+        record=fake_record(study)
+        record["doi"]="10.9999/unrelated.article"
+        result=evaluate_source(study,record)
+        self.assertFalse(result["checks"]["source_doi_identity"])
+        self.assertIn("INCOMPLETE",result["verification_status"])
+
     def test_source_number_presence_not_scientific_validation(self):
         study=SEED["studies"][0]
         s=evaluate_source(study,fake_record(study))
