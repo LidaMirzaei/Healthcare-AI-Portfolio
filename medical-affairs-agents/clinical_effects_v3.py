@@ -13,7 +13,9 @@ from pathlib import Path
 
 from clinical_effects import (results_paragraphs, compact, EFFECT, INTERVAL,
                               ENDPOINTS, SENTENCE)
-from independent_holdout import extract_source_identity, license_classification, text_of
+from independent_holdout import (extract_source_identity, license_classification,
+                                 text_of, abstract_and_design_text,
+                                 infer_study_registration)
 from fulltext_evidence import BASE, fetch
 
 ENDPOINTS_V3={
@@ -149,6 +151,9 @@ def extract_v3(xml_bytes, pmcid):
     if not doi or not title or (pmc_id and pmc_id!=pmcid.replace("PMC","")):
         result["status"]="BLOCKED_IDENTITY"
         return result
+    # Metadata-only title assessment is safe even if full-text analysis is
+    # subsequently blocked by document rights. It does NOT certify study type.
+    result["title_type_hint"]=article_kind(title,"")
     if result["license"]["status"]!="CC_BY_OR_CC0_CONFIRMED":
         result["status"]="BLOCKED_LICENSE_REVIEW_REQUIRED"
         return result
@@ -156,6 +161,16 @@ def extract_v3(xml_bytes, pmcid):
     abstext=" ".join(a["text"] for a in abstracts)
     kind=article_kind(title,abstext)
     result["article_kind"]=kind
+    # Registration is an unverified grouping candidate, NOT proof that a
+    # registration mentioned in the abstract belongs to this publication.
+    _, abstract_for_registration, method_for_registration = abstract_and_design_text(root)
+    registration, registration_location = infer_study_registration(
+        abstract_for_registration, method_for_registration)
+    result["registration_candidate"]=registration
+    result["registration_candidate_source"]=registration_location
+    if kind=="PROTOCOL_NOT_OBSERVED_RESULTS":
+        result["status"]="BLOCKED_PROTOCOL_NOT_OBSERVED_RESULTS"
+        return result
     if kind=="SECONDARY_REVIEW_NOT_NEW_TRIAL":
         result["status"]="BLOCKED_SECONDARY_SYNTHESIS_AS_PRIMARY_STUDY"
         return result
@@ -184,6 +199,13 @@ def extract_v3(xml_bytes, pmcid):
         if key not in unique:
             unique[key]=c
     result["candidates"]=list(unique.values())
+    result["unresolved_critical_fields"]=[
+        "population_and_line_of_therapy", "treatment_and_control_arms",
+        "subgroup_or_analysis_population", "primary_or_secondary_endpoint",
+        "data_cutoff_and_follow_up", "source_table_or_figure_reconciliation",
+        "effect_direction_and_clinical_significance", "outcome_specific_risk_of_bias",
+    ]
+    result["scientific_claim_approved"]=False
     result["matched_effect_count"]=sum(
         1 for c in result["candidates"]
         if c["status"]=="NUMERIC_SOURCE_CANDIDATE_NOT_CLINICALLY_VALIDATED")
