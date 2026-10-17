@@ -1,0 +1,43 @@
+name: Oncology Evidence Reviewer Queue Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'medical-affairs-agents/clinical_effects_v3.py'
+      - 'medical-affairs-agents/evidence_review_queue.py'
+      - 'medical-affairs-agents/test_clinical_effects_v3.py'
+      - 'medical-affairs-agents/test_evidence_review_queue.py'
+      - '.github/workflows/oncology-evidence-review-queue.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  review-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run entire offline safety suite
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Extract candidate effects from previously examined source articles
+        run: |
+          python medical-affairs-agents/clinical_effects_v3.py \
+            --pmcids PMC11771365 PMC13449377 PMC13583573 PMC12494613 \
+            --out medical-affairs-agents/output/review_queue_smoke
+      - name: Compile a conservative reviewer queue and shared-trial warnings
+        run: |
+          python medical-affairs-agents/evidence_review_queue.py \
+            --input medical-affairs-agents/output/review_queue_smoke/v3_effect_candidates.json \
+            --out medical-affairs-agents/output/review_queue_smoke
+      - name: Archive review queue and rejection reasons
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-queue-smoke-candidates-and-audit
+          path: medical-affairs-agents/output/review_queue_smoke/
+          retention-days: 14
