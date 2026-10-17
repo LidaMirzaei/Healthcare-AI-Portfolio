@@ -95,14 +95,9 @@ def fetch_pmid(pmid):
         raise LookupError("Original PubMed record not uniquely resolved")
     return original[0]
 
-def fetch_ncbi_trial_registrations(pmid):
-    """Free NCBI PubMed XML databank metadata, not publisher article full text."""
-    params=urllib.parse.urlencode({"db":"pubmed","id":pmid,"retmode":"xml"})
-    endpoint="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"+params
-    req=urllib.request.Request(endpoint,
-        headers={"User-Agent":"PublicOncologyResearchTrialIdentityAudit/1.0"})
-    with urllib.request.urlopen(req,timeout=30) as response:
-        root=ET.fromstring(response.read())
+def parse_ncbi_trial_registrations(xml_bytes):
+    """Extract only trial IDs from structured original PubMed databank entries."""
+    root=ET.fromstring(xml_bytes)
     result=set()
     for bank in root.findall(".//DataBankList/DataBank"):
         name=norm(bank.findtext("DataBankName")).lower()
@@ -119,6 +114,16 @@ def fetch_ncbi_trial_registrations(pmid):
             if NCT.fullmatch(candidate):
                 result.add(candidate)
     return sorted(result)
+
+
+def fetch_ncbi_trial_registrations(pmid):
+    """Free NCBI PubMed XML databank metadata, not publisher article full text."""
+    params=urllib.parse.urlencode({"db":"pubmed","id":pmid,"retmode":"xml"})
+    endpoint="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"+params
+    req=urllib.request.Request(endpoint,
+        headers={"User-Agent":"PublicOncologyResearchTrialIdentityAudit/1.0"})
+    with urllib.request.urlopen(req,timeout=30) as response:
+        return parse_ncbi_trial_registrations(response.read())
 
 
 def evaluate_source(seed, record):
