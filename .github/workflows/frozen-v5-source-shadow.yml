@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
       - name: Validate gold-blind parser with synthetic tests before first external scoring
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
-      - name: V5 regression with verified metadata identity and numeric CI-abstention diagnostics
+      - name: V5 regression on short-range HR-CI pairing, with frozen answers unchanged
         run: |
           python medical-affairs-agents/pubmed_shadow_extractor.py \
             --pmids 40217078 41422862 39660834 41124233 \
