@@ -1,0 +1,39 @@
+name: First V6 Unseen Breast Oncology Source Challenge — Not Clinical Gold
+
+on:
+  push:
+    paths:
+      - '.github/workflows/frozen-v6-source-shadow.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  one-time-v6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run synthetic safety tests before viewing untouched V6 source outcomes
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Blind original-PubMed extraction for three completely different study families
+        run: |
+          python medical-affairs-agents/pubmed_shadow_extractor.py \
+            --pmids 40454645 39481395 37086745 \
+            --out medical-affairs-agents/output/v6_new_sources/predictions.json
+      - name: Evaluate pre-frozen V6 HR-CI pairs and no-invented-CI controls
+        run: |
+          python medical-affairs-agents/evaluate_pubmed_shadow_v6.py \
+            --frozen medical-affairs-agents/benchmarks/SHADOW_V6_FROZEN_SOURCE_SPOTCHECK.json \
+            --predictions medical-affairs-agents/output/v6_new_sources/predictions.json \
+            --out medical-affairs-agents/output/v6_new_sources/
+      - name: Save real source match/abstention audit without abstracts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-v6-external-source-audit-not-medical-gold
+          path: medical-affairs-agents/output/v6_new_sources/
+          retention-days: 14
