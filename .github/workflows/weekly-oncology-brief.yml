@@ -1,8 +1,6 @@
 name: Weekly Public Oncology Research Brief
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 13 * * 1'
 
 permissions:
   contents: read
