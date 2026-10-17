@@ -42,13 +42,14 @@ def score(predictions, frozen):
     docs={x["pmid"]:x for x in predictions["articles"]}
     if len(docs)!=len(predictions["articles"]) or set(docs)!=set(pmids):
         raise ValueError("Unexpected or duplicated prediction source IDs")
-    checked=[];total_candidates=0;total_abstained=0;source_identity_pass=0
+    checked=[];total_candidates=0;total_abstained=0;source_identity_pass=0; results_section_count=0
     for source in src:
         record=docs[source["pmid"]]
-        identity=(record.get("doi","").lower()==source["doi"].lower()
-                  and record.get("source_status") in (
-                      "ABSTRACT_RESULTS_ONLY","ORIGINAL_PUBMED_XML_RESULTS_TAGGED"))
+        identity=(record.get("doi","").lower()==source["doi"].lower())
+        recognized_results=record.get("source_status") in (
+            "ABSTRACT_RESULTS_ONLY","ORIGINAL_PUBMED_XML_RESULTS_TAGGED")
         source_identity_pass+=int(identity)
+        results_section_count+=int(recognized_results)
         candidates=record.get("candidates",[])
         total_candidates+=len(candidates)
         total_abstained+=len(record.get("abstentions",[]))
@@ -57,7 +58,7 @@ def score(predictions, frozen):
         for j,ref in enumerate(source["expected"]):
             matches=[(i,c) for i,c in enumerate(candidates)
                      if i not in used and exact_pair(ref,c)]
-            if identity and matches:
+            if identity and recognized_results and matches:
                 i,_=matches[0];used.add(i)
                 passed=True
             else:
@@ -91,6 +92,7 @@ def score(predictions, frozen):
         "first_run_only_external_status":"CONSUMED_AFTER_FIRST_RUN",
         "source_records_verified":source_identity_pass,
         "source_records_expected":len(src),
+        "result_sections_identified":results_section_count,
         "predeclared_numeric_pairs":len(numeric),
         "exact_numeric_tuple_pairs_matched":passed,
         "unmatched_predeclared_pairs":len(numeric)-passed,
@@ -108,6 +110,7 @@ def render(out):
            "**This is NOT clinical accuracy, specialist gold, or full-text evidence validation.**",
            "Predictions were created without labels. This run consumes V5's initial independence.",
            f"- Original PubMed PMID+DOI sources: {out['source_records_verified']}/{out['source_records_expected']}",
+           f"- Tagged or explicit Results sections found: {out['result_sections_identified']}/{out['source_records_expected']}",
            f"- Predeclared numeric tuples matched: {out['exact_numeric_tuple_pairs_matched']}/{out['predeclared_numeric_pairs']}",
            f"- Numeric tuples missed: {out['unmatched_predeclared_pairs']}",
            f"- All extracted reviewable candidates (may include unlabelled): {out['source_candidate_count_all']}",
@@ -153,6 +156,7 @@ def main():
     (path/"shadow_v5_scorecard.md").write_text(render(evaluated),encoding="utf-8")
     print("V5_SOURCE_IDENTITIES",evaluated["source_records_verified"],
           "/",evaluated["source_records_expected"])
+    print("V5_RECOGNIZED_RESULTS_SECTIONS",evaluated["result_sections_identified"])
     print("V5_EXACT_TUPLE_MATCHES",evaluated["exact_numeric_tuple_pairs_matched"],
           "/",evaluated["predeclared_numeric_pairs"])
     print("V5_UNMATCHED_TUPLES",evaluated["unmatched_predeclared_pairs"])
