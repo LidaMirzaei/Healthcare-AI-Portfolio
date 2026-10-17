@@ -132,3 +132,17 @@ The ten original ADC paper-development references have been re-audited for scien
 
 **Scientific precision and recall are still unmeasured.** Green software tests, endpoint candidates and PubMed metadata checks are not independently adjudicated full-text scientific outcomes. Two medically qualified independent reviewers and a new study-family-disjoint holdout will be required before claiming clinical performance.
 
+
+
+### Gold-standard scientific-review readiness (October 17, 2026)
+
+**New live GitHub workflow:** [Oncology Gold-Standard Readiness — no clinical scores](https://github.com/LidaMirzaei/Healthcare-AI-Portfolio/actions/runs/39014744070): **187/187** offline Python tests passed; exact ten original PMID/DOI source records were fetched; a 10-claim provisional review queue and **30 mandatory harms/methods/negative-outcome review tasks** were prepared. Two separate reviewer forms were generated **blank**. **Human expert adjudicated gold count: 0.** The paper result extraction source candidates are *not* a medically validated reference truth corpus.
+
+- [Two-independent-reviewer source gate and conflict detector](clinical_reference_review.py) requires candidate-set integrity, original study identity, review of harms, methods and negative outcomes, explicit source locators, and flags all differences without selecting a winner.
+- [Reserved family-disjoint V4 pool](benchmarks/RESERVED_V4_TRIAL_FAMILIES.json) contains **six unique, unscored study families**, including both randomized and single-arm ADC evidence. No outcome labels are stored. These are prospective reserved studies, **not fully blinded** because some abstracts were already visible during development planning.
+- [More comprehensive gold evaluator v2](clinical_gold_evaluator_v2.py) supports PubMed-only original studies without PMCIDs, noncomparative single-arm response measures and nonstandard **95.01% confidence intervals**. It separates correct numbers from correct treatment arm/population/cutoff/source locator and requires a reserved-family manifest before CLI scoring. No real human-adjudicated labels have been submitted, so no real accuracy or recall percentage is available.
+- [Pilot original-public-abstract checks](benchmarks/ORIGINAL_ABSTRACT_PILOT_SOURCE_CROSSCHECK.json) cover TROPION-Breast01, TROPION-Breast02 and DESTINY-Breast05, with separate PFS, OS, iDFS, DFS, ILD and cutoff/erratum warnings. This is assistant/source spot-checking, **not** independent qualified scientific verification.
+- Read [the real reviewer recruitment and adjudication protocol](benchmarks/GOLD_REVIEW_PROTOCOL.md). Only an organization can attest real specialist identity/independence and approve a clinical gold dataset outside this public repository.
+- Access rights remain separated from scientific quality. No commercial license, confidential company material or paid LLM API was used.
+
+**The actual next dependency:** recruit **two independent qualified reviewers** who can access the original Methods/Results/tables/supplements, complete the separate forms, and adjudicate corrections and disagreements. Only then run the frozen independent validation on the reserved new studies with per-field precision, recall, citation error rate and end-to-end reviewer time.
