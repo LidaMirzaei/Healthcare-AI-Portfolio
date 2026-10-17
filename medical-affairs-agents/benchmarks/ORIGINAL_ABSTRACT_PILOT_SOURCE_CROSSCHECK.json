@@ -1,0 +1,192 @@
+{
+  "schema": "original-source-abstract-crosscheck-pilot-v1",
+  "created_date": "2026-10-17",
+  "status": "ASSISTANT_PUBLIC_ABSTRACT_SPOTCHECK_PENDING_INDEPENDENT_CLINICAL_REVIEW",
+  "scope": "Three original publications from the ten-family development set. Original PubMed abstract facts only, NOT original full-text/appendix verification.",
+  "expert_reviewer_A": null,
+  "expert_reviewer_B": null,
+  "external_adjudication": null,
+  "scientifically_adjudicated_claim_count": 0,
+  "studies": [
+    {
+      "trial_id": "NCT05104866",
+      "trial": "TROPION-Breast01",
+      "pmid": "39265124",
+      "doi": "10.1200/JCO.24.00920",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/39265124/",
+      "section": "Original PubMed Abstract: METHODS and RESULTS",
+      "population": "Previously treated inoperable/metastatic HR-positive HER2-negative breast cancer; prior 1–2 advanced chemotherapy lines",
+      "arms": [
+        {
+          "treatment": "Dato-DXd",
+          "randomized_n": 365
+        },
+        {
+          "treatment": "investigator choice chemotherapy",
+          "randomized_n": 367
+        }
+      ],
+      "entries": [
+        {
+          "endpoint": "PFS by BICR",
+          "hierarchy": "dual_primary",
+          "measure": "HR",
+          "value": 0.63,
+          "ci_level": 95,
+          "ci_lower": 0.52,
+          "ci_upper": 0.76,
+          "provenance": "public abstract Results",
+          "qualifier": "Primary PFS data"
+        },
+        {
+          "endpoint": "OS",
+          "hierarchy": "dual_primary",
+          "measure": "HR",
+          "value": 0.84,
+          "ci_level": 95,
+          "ci_lower": 0.62,
+          "ci_upper": 1.14,
+          "provenance": "public abstract Results",
+          "qualifier": "Immature OS in original analysis; do NOT substitute for later final OS"
+        },
+        {
+          "endpoint": "Grade >=3 treatment-related adverse events",
+          "measure": "percent",
+          "experimental": 20.8,
+          "control": 44.7,
+          "provenance": "public abstract Results",
+          "qualifier": "Original analysis cutoff only; later safety percentages differ"
+        }
+      ],
+      "gaps": [
+        "Final OS original subsequent report and cutoff",
+        "Protocol and primary/secondary analyses",
+        "Original full-text Tables and supplements",
+        "Eligibility detailed methods",
+        "Review of serious AE taxonomy"
+      ]
+    },
+    {
+      "trial_id": "NCT05374512",
+      "trial": "TROPION-Breast02",
+      "pmid": "41937088",
+      "doi": "10.1016/j.annonc.2026.03.008",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/41937088/",
+      "section": "Original PubMed Abstract: PATIENTS AND METHODS and RESULTS",
+      "population": "Previously untreated locally recurrent inoperable or metastatic TNBC for whom immunotherapy was not an option",
+      "arms": [
+        {
+          "treatment": "Dato-DXd",
+          "randomized_n": 323
+        },
+        {
+          "treatment": "investigator choice chemotherapy",
+          "randomized_n": 321
+        }
+      ],
+      "entries": [
+        {
+          "endpoint": "PFS by blinded independent central review",
+          "hierarchy": "dual_primary",
+          "measure": "HR",
+          "value": 0.57,
+          "ci_level": 99,
+          "ci_lower": 0.44,
+          "ci_upper": 0.73,
+          "provenance": "public abstract Results",
+          "qualifier": "99% CI, NOT 95%"
+        },
+        {
+          "endpoint": "OS",
+          "hierarchy": "dual_primary",
+          "measure": "HR",
+          "value": 0.79,
+          "ci_level": 95.01,
+          "ci_lower": 0.64,
+          "ci_upper": 0.98,
+          "provenance": "public abstract Results",
+          "qualifier": "95.01% CI, distinct from PFS 99%"
+        },
+        {
+          "endpoint": "Grade >=3 treatment-related adverse events",
+          "measure": "percent",
+          "experimental": 33,
+          "control": 29,
+          "provenance": "public abstract Results",
+          "qualifier": "Treated safety population; denominator must be checked independently"
+        }
+      ],
+      "gaps": [
+        "Original publication/ClinicalTrials.gov registry linkage",
+        "Exact OS multiplicity and alpha-spending analysis",
+        "Analysis cutoff date",
+        "Safety denominators and AE grades",
+        "Full-text verification and corrections"
+      ]
+    },
+    {
+      "trial_id": "NCT04622319",
+      "trial": "DESTINY-Breast05",
+      "pmid": "41370739",
+      "doi": "10.1056/NEJMoa2514661",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/41370739/",
+      "section": "Original PubMed Abstract: METHODS and RESULTS",
+      "population": "High-risk HER2-positive residual invasive early breast cancer after neoadjuvant therapy",
+      "arms": [
+        {
+          "treatment": "T-DXd",
+          "randomized_n": 818
+        },
+        {
+          "treatment": "T-DM1",
+          "randomized_n": 817
+        }
+      ],
+      "entries": [
+        {
+          "endpoint": "invasive disease-free survival",
+          "hierarchy": "primary",
+          "measure": "HR",
+          "value": 0.47,
+          "ci_level": 95,
+          "ci_lower": 0.34,
+          "ci_upper": 0.66,
+          "provenance": "public abstract Results",
+          "qualifier": "Do not confuse with secondary DFS"
+        },
+        {
+          "endpoint": "disease-free survival",
+          "hierarchy": "key_secondary",
+          "measure": "HR",
+          "value": 0.47,
+          "ci_level": 95,
+          "ci_lower": 0.34,
+          "ci_upper": 0.66,
+          "provenance": "public abstract Results",
+          "qualifier": "Separate endpoint: same HR and CI but different event definition"
+        },
+        {
+          "endpoint": "Adjudicated drug-related ILD",
+          "measure": "percent",
+          "experimental": 9.6,
+          "control": 1.6,
+          "provenance": "public abstract Results",
+          "qualifier": "Two T-DXd-arm ILD-related deaths also reported"
+        }
+      ],
+      "gaps": [
+        "Correction/erratum PMID 41931063 needs qualified check",
+        "Original full-text and supplementary adverse-event tables",
+        "Time-point-specific denominators",
+        "Outcome-specific risk of bias, missingness, competing risks"
+      ]
+    }
+  ],
+  "interpretation_guardrails": [
+    "These are public-abstract source-aligned candidate facts, not completed clinical review.",
+    "Published results of same NCT cannot be counted as independent confirmations.",
+    "Contrast of different endpoints/populations is not head-to-head ADC comparative efficacy.",
+    "No public article full text is redistributed.",
+    "At least two genuinely independent qualified reviewers required for an authentic gold standard."
+  ]
+}
