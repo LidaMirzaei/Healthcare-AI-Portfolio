@@ -13,6 +13,7 @@ import time
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+from abstract_statistic_verifier import verify_local_result
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -134,6 +135,10 @@ def evaluate_source(seed, record):
     pmid_ok=observed_pmid==seed["pmid"] and record.get("source","MED")=="MED"
     doi_ok=norm(record.get("doi")).lower().strip()==seed["expected_doi"].lower().strip()
     nct_ok=bool(re.search(r"(?<!\w)"+re.escape(seed["nct"])+r"(?!\w)",abstract,re.I))
+    local=verify_local_result(abstract,measure=seed["measure"],
+         estimate=seed["estimate"],ci_level=seed["ci_level"],
+         ci_lower=seed["ci_lower"],ci_upper=seed["ci_upper"],
+         endpoint=seed["endpoint"])
     # Regulatory and statistical outputs need manual verification even if all
     # their numbers occur nearby, because association to comparator isn't proven.
     found=has_exact_number(abstract,seed["estimate"])
@@ -147,9 +152,12 @@ def evaluate_source(seed, record):
     ci_ok=all(ci_parts.values())
     # Some abstracts omit trial IDs or particular CI bounds; mark incomplete.
     # Never convert incomplete metadata to a fabricated positive finding.
-    status=("ABSTRACT_NUMBER_TOKENS_LOCATED_REVIEW_REQUIRED"
-            if pmid_ok and doi_ok and nct_ok and found and ci_ok else
-            "ABSTRACT_SOURCE_CHECK_INCOMPLETE_REVIEW_REQUIRED")
+    # A local effect/CI match and nearby endpoint are necessary to advance.
+    # Scattered abstract number tokens never produce a positive verification.
+    local_candidate=local["endpoint_bound_candidate_count"]>0
+    status=("ABSTRACT_LOCAL_STATISTIC_CANDIDATE_REVIEW_REQUIRED"
+            if pmid_ok and doi_ok and nct_ok and local_candidate
+            else "ABSTRACT_SOURCE_CHECK_INCOMPLETE_REVIEW_REQUIRED")
     # Records deliberately exclude copied abstracts/source full text.
     return {
         "key":seed["key"],"pmid":seed["pmid"],"nct_candidate":seed["nct"],
@@ -160,7 +168,9 @@ def evaluate_source(seed, record):
         "verification_status":status,
         "checks":{"pubmed_identity":pmid_ok,"source_doi_identity":doi_ok,
                   "nct_found_in_abstract":nct_ok,
+                  "local_statistic_endpoint_candidate":local_candidate,
                   "estimate_number_token_found":found,**ci_parts},
+        "statistic_context_check":local,
         "endpoint_label_provisional":seed["endpoint"],
         "effect_measure_provisional":seed["measure"],
         "effect_estimate_provisional":seed["estimate"],
@@ -256,10 +266,9 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
                         "PENDING_SOURCE_REVIEW")
                     if verified and all(result["checks"][k] for k in (
                         "pubmed_identity","source_doi_identity",
-                        "estimate_number_token_found",
-                        "ci_level","ci_lower","ci_upper")):
+                        "local_statistic_endpoint_candidate")):
                         result["verification_status"]=(
-                            "ABSTRACT_NUMBERS_AND_NCBI_REGISTRY_LOCATED_REVIEW_REQUIRED")
+                            "ABSTRACT_LOCAL_STATISTIC_AND_NCBI_REGISTRY_REVIEW_REQUIRED")
                 except (OSError,ET.ParseError,ValueError,TimeoutError):
                     result["checks"]["nct_found_in_pubmed_databank"]=False
                     result["registration_verification_source"]="NCBI_METADATA_FETCH_FAILED"
@@ -277,11 +286,11 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
       "reference_status":"PROVISIONAL_NOT_EXPERT_ADJUDICATED",
       "study_families":len(seed["studies"]),
       "source_checks_completed":sum("checks" in r for r in results),
-      "abstract_token_checks_passed":sum(
-          r["verification_status"]=="ABSTRACT_NUMBER_TOKENS_LOCATED_REVIEW_REQUIRED"
+      "strict_local_effect_checks_passed":sum(
+          r["verification_status"]=="ABSTRACT_LOCAL_STATISTIC_CANDIDATE_REVIEW_REQUIRED"
           for r in results),
-      "abstract_number_plus_pubmed_registry_checks_passed":sum(
-          r["verification_status"]=="ABSTRACT_NUMBERS_AND_NCBI_REGISTRY_LOCATED_REVIEW_REQUIRED"
+      "strict_local_effect_plus_pubmed_registry_checks_passed":sum(
+          r["verification_status"]=="ABSTRACT_LOCAL_STATISTIC_AND_NCBI_REGISTRY_REVIEW_REQUIRED"
           for r in results),
       "statistically_validated_outcome_count":0,
       "expert_adjudicated_outcome_count":0,
@@ -297,8 +306,8 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
         build_report(seed,results,elapsed),encoding="utf-8")
     print("REFERENCE_UNIQUE_FAMILIES",len(seed["studies"]))
     print("REFERENCE_PUBMED_CHECKS",payload["source_checks_completed"])
-    print("REFERENCE_ABSTRACT_TOKENS_LOCATED",payload["abstract_token_checks_passed"])
-    print("REFERENCE_ADDITIONAL_NCBI_REGISTRATIONS",payload["abstract_number_plus_pubmed_registry_checks_passed"])
+    print("REFERENCE_LOCAL_EFFECT_CANDIDATES",payload["strict_local_effect_checks_passed"])
+    print("REFERENCE_LOCAL_EFFECT_PLUS_NCBI_REGISTRY",payload["strict_local_effect_plus_pubmed_registry_checks_passed"])
     print("REFERENCE_RUNTIME_SECONDS",round(elapsed,3))
     return payload
 
