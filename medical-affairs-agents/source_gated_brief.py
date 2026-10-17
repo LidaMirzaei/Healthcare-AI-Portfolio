@@ -80,8 +80,14 @@ def tables_from_xml(xml_data, pmcid):
                 cells=[c for c in tr if c.tag.rsplit("}",1)[-1] in ("th","td","entry")]
                 if not cells:
                     continue
-                if any(any(key in c.attrib for key in ("rowspan","colspan","namest","nameend")) for c in cells):
-                    irregular+=1
+                if any(
+                    int(cell.attrib.get("rowspan", "1")) > 1
+                    or int(cell.attrib.get("colspan", "1")) > 1
+                    or (cell.attrib.get("namest") and cell.attrib.get("nameend")
+                        and cell.attrib["namest"] != cell.attrib["nameend"])
+                    for cell in cells
+                ):
+                    irregular += 1
                 rows.append([normal(" ".join(c.itertext())) for c in cells])
         table_id=wrap.get("id")
         # Do not imply a table is correctly parsed merely because rows exist.
@@ -154,7 +160,7 @@ def brief_markdown(released, blocked, structures, elapsed):
       "# TROPION-Breast01 — Source-Gated Evidence Brief (research prototype)",
       "",
       "**NOT an approved medical-affairs document, clinical recommendation, or completed systematic review.**",
-      "Automated text-context matches are *candidates requiring scientific review*, not verified medical claims.",
+      "Automated text-context matches are *candidates requiring scientific review*, not verified medical claims. Paragraph numbers such as PMC11771365-p15 are **internal parser identifiers**, not direct publisher URL anchors; use the linked article, section title and quoted context in the JSON audit to verify.",
       "",
       "## Research questions",
       "1. Among previously treated inoperable/metastatic HR+/HER2-negative breast cancer patients, how does Dato-DXd compare with investigator-choice chemotherapy for efficacy?",
@@ -210,7 +216,7 @@ def brief_markdown(released, blocked, structures, elapsed):
     for s in CLAIMS:
         a=next((x for x in released+blocked if x["id"]==s["id"]),
                {"id":s["id"],"status":"BLOCKED_NOT_EVALUATED","candidates":[]})
-        link="; ".join(f"[{c['paragraph_id']}]({c['link']})" for c in a.get("candidates",[])) or "NONE"
+        link="; ".join(f"[{c['paragraph_id']} — {c['section']}]({c['link']})" for c in a.get("candidates",[])) or "NONE"
         lines.append(f"| {s['endpoint']} | {s['value']} | {a['status']} | {link} |")
     lines += ["","## Benefits, harms and limits — grounded interpretation rules",
        "**Strengths for PFS evidence:** a global phase III randomized comparison and blinded independent central review of PFS lessen some common biases, but do not guarantee an overall low risk of bias.",
@@ -227,7 +233,7 @@ def brief_markdown(released, blocked, structures, elapsed):
     lines += ["","Reference: https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-08",
               "",
               "## Article coverage audit: tables and supplementary material",
-              "| Article | XML tables seen | Rows parsed | Nonrectangular/merged rows | Figures found | Supplement markers |",
+              "| Article | XML tables seen | Rows parsed | Rows with multi-cell spans | Figures found | Supplement markers |",
               "|---|---:|---:|---:|---:|---:|"]
     for pmcid,x in structures.items():
         lines.append(f"| [{pmcid}](https://pmc.ncbi.nlm.nih.gov/articles/{pmcid}/) | "
