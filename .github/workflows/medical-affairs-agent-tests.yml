@@ -1,14 +1,6 @@
 name: Medical Affairs Agent — Python tests
 
 on:
-  push:
-    paths:
-      - 'medical-affairs-agents/**'
-      - '.github/workflows/medical-affairs-agent-tests.yml'
-  pull_request:
-    paths:
-      - 'medical-affairs-agents/**'
-      - '.github/workflows/medical-affairs-agent-tests.yml'
   workflow_dispatch:
 
 permissions:
