@@ -96,7 +96,12 @@ def ratio_effects(results):
     accepted, abstained=[],[]
     for i,ratio in enumerate(ratios):
         end=ratios[i+1].start() if i+1<len(ratios) else len(results)
-        intervals=[ci for ci in cis if ratio.end()<=ci.start()<=ratio.end()+130
+        # A wide 130-character window can swallow a later ORR/median CI
+        # and incorrectly abstain on an otherwise explicit HR 95% CI.
+        # Bind only the immediately following statistical interval. If
+        # two CIs start within this narrow window, abstain instead of
+        # silently picking whichever makes the source look successful.
+        intervals=[ci for ci in cis if ratio.end()<=ci.start()<=ratio.end()+50
                    and ci.end()<=end]
         label=contextual_endpoint(results,ratio.start())
         base={
