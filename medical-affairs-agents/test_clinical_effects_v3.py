@@ -71,7 +71,17 @@ class GeneralExtractionTests(unittest.TestCase):
                              paragraph="This protocol will collect PFS at the final analysis.",
                              abstract="A trial is planned."),
                      "PMC77777777")
-        self.assertEqual(d["status"],"BLOCKED_NO_OBSERVED_FULLTEXT_RESULTS")
+        self.assertEqual(d["status"],"BLOCKED_PROTOCOL_NOT_OBSERVED_RESULTS")
+
+    def test_protocol_with_fake_results_heading_still_blocks(self):
+        d=extract_v3(sample(
+            title="Randomized prospective breast cancer study protocol",
+            heading="Results",
+            paragraph="A simulation projects OS HR 0.44 (95% CI 0.31–0.62), but no patient outcomes have been measured.",
+            abstract="This protocol outlines future planned experiments."
+        ),"PMC77777777")
+        self.assertEqual(d["status"],"BLOCKED_PROTOCOL_NOT_OBSERVED_RESULTS")
+        self.assertEqual(d["candidates"],[])
 
     def test_review_not_original_trial(self):
         d=extract_v3(sample(title="Systematic review and network meta-analysis of trials"),
