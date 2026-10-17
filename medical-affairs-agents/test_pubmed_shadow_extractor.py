@@ -53,6 +53,22 @@ class GoldBlindPubMedTests(unittest.TestCase):
         self.assertEqual([x["estimate"] for x in v["candidates"]],[0.50])
         self.assertTrue(any(x["status"]=="ABSTAIN_NO_UNIQUE_ATTACHED_CI" for x in v["abstentions"]))
 
+    def test_next_unrelated_response_rate_ci_does_not_invalidate_hr(self):
+        text=("Results: The median PFS was 9.7 versus 6.9 months "
+              "(stratified hazard ratio for progression or death, 0.62; "
+              "95% CI 0.50 to 0.77; P<0.001). Objective response was 48% "
+              "(95% CI 42 to 54) in the first group.")
+        r=interpret_original_record("99991111",stub(text))
+        self.assertEqual([c["estimate"] for c in r["candidates"]],[0.62])
+        self.assertEqual(r["abstentions"],[])
+
+    def test_two_competing_immediate_ci_pairs_must_abstain(self):
+        text=("Results: PFS HR 0.62; 95% CI 0.50-0.77, "
+              "95% CI 0.44-0.81; both claimed for same ratio.")
+        r=interpret_original_record("99991111",stub(text))
+        self.assertEqual(r["candidates"],[])
+        self.assertEqual(r["abstentions"][0]["status"],"ABSTAIN_NO_UNIQUE_ATTACHED_CI")
+
     def test_no_os_from_pfs_background_in_results(self):
         t="Results: Median PFS 4 months (HR 0.50; 95% CI 0.30-0.70)."
         v=interpret_original_record("99991111",stub(t))
