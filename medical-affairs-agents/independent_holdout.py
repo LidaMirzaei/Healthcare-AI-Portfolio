@@ -58,7 +58,7 @@ def license_classification(root):
         return {"status": "BLOCKED_AMBIGUOUS_OR_MULTIPLE_LICENSES",
                 "url": sorted(urls)[0] if urls else None}
     lic = next(iter(canonical))
-    if re.fullmatch(r"/(?:licenses/by|publicdomain/zero)/[234]\.0", lic):
+    if re.fullmatch(r"/(?:licenses/by/(?:3|4)\.0|publicdomain/zero/1\.0)", lic):
         return {"status": "CC_BY_OR_CC0_CONFIRMED", "url": sorted(urls)[0] if urls else None}
     return {"status": "BLOCKED_LICENSE_NOT_APPROVED", "url": sorted(urls)[0] if urls else None}
 
@@ -139,6 +139,18 @@ def fingerprint(xml_bytes, pmcid):
     got_pmc = ids.get("pmc", "")
     if got_pmc and got_pmc.replace("PMC", "") != pmcid.replace("PMC", ""):
         raise ValueError("PMCID mismatch — source identity violation")
+    if license_info["status"] != "CC_BY_OR_CC0_CONFIRMED":
+        # License review must happen before content mining; only source
+        # identity/title and license metadata may be stored in this scenario.
+        return {
+            "pmcid": pmcid, "doi": ids.get("doi", "").lower(),
+            "title": title, "license": license_info,
+            "design": "BLOCKED_BY_LICENSE", "setting": "BLOCKED_BY_LICENSE",
+            "registration": "BLOCKED_BY_LICENSE",
+            "registration_found_in": None,
+            "source": f"https://pmc.ncbi.nlm.nih.gov/articles/{pmcid}/",
+            "automated_efficacy_or_safety_conclusion": "NOT_PERFORMED",
+        }
     registration, registration_section = infer_study_registration(abstract, methods)
     return {
         "pmcid": pmcid, "doi": ids.get("doi", "").lower(),
