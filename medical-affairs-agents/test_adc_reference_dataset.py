@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from adc_reference_dataset import (
     DEFAULT_SEED, check_reference_schema, evaluate_source,
-    has_exact_number, norm, build_report
+    has_exact_number, norm, build_report, parse_ncbi_trial_registrations
 )
 
 SEED=json.loads(DEFAULT_SEED.read_text(encoding="utf-8"))
@@ -91,6 +91,27 @@ class ADCReferenceTests(unittest.TestCase):
         self.assertIn("single-arm",draft)
         self.assertIn("99%",draft)
         self.assertIn("NOT a gold standard",draft)
+    def test_pubmed_structured_databank_registration(self):
+        xml=b"""<PubmedArticleSet><PubmedArticle>
+          <MedlineCitation><Article><Abstract><AbstractText>
+          Cited study NCT99999999 is not this article's registration.
+          </AbstractText></Abstract></Article>
+          <DataBankList><DataBank>
+          <DataBankName>ClinicalTrials.gov</DataBankName>
+          <AccessionNumberList><AccessionNumber>NCT05104866</AccessionNumber>
+          </AccessionNumberList></DataBank></DataBankList></MedlineCitation>
+          </PubmedArticle></PubmedArticleSet>"""
+        self.assertEqual(parse_ncbi_trial_registrations(xml),["NCT05104866"])
+
+    def test_unrelated_text_id_not_treated_as_trial_registration(self):
+        xml=b"<PubmedArticleSet><CommentsCorrectionsList><RefSource>NCT05104866</RefSource></CommentsCorrectionsList></PubmedArticleSet>"
+        self.assertEqual(parse_ncbi_trial_registrations(xml),[])
+
+    def test_invalid_ncbi_xml_does_not_silently_verify(self):
+        from xml.etree import ElementTree as ET
+        with self.assertRaises(ET.ParseError):
+            parse_ncbi_trial_registrations(b"not xml")
+
     def test_modified_ci_outside_estimate_rejected(self):
         b=copy.deepcopy(SEED)
         b["studies"][0]["ci_lower"]=0.80
