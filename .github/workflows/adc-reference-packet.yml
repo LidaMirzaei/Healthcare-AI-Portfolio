@@ -6,6 +6,8 @@ on:
     paths:
       - 'medical-affairs-agents/adc_reference_dataset.py'
       - 'medical-affairs-agents/test_adc_reference_dataset.py'
+      - 'medical-affairs-agents/adc_reviewer_worksheet.py'
+      - 'medical-affairs-agents/test_adc_reviewer_worksheet.py'
       - 'medical-affairs-agents/benchmarks/ADC_REFERENCE_CANDIDATES_V1.json'
       - '.github/workflows/adc-reference-packet.yml'
 
@@ -25,6 +27,8 @@ jobs:
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
       - name: Audit ten independent breast cancer ADC study records via free PubMed metadata
         run: python medical-affairs-agents/adc_reference_dataset.py
+      - name: Generate ten source-specific two-reviewer checklists (unfilled)
+        run: python medical-affairs-agents/adc_reviewer_worksheet.py
       - name: Save only article IDs, structured facts, source statuses and readable report
         if: always()
         uses: actions/upload-artifact@v4
