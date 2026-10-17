@@ -1,7 +1,7 @@
 import unittest
 from source_gated_brief import (
     verify_article_id, tables_from_xml, verify_claim, brief_markdown,
-    CLAIMS, OS_SOURCE, reviewer_questions,
+    CLAIMS, OS_SOURCE, reviewer_questions, negative_control_benchmark,
 )
 
 def mock_xml(doi="10.1200/JCO.24.00920", pmcid="PMC11771365"):
@@ -68,6 +68,12 @@ class StrictSourceReportTests(unittest.TestCase):
         self.assertIn("PFS conclusion BLOCKED",text)
         self.assertIn("NOT_MACHINE_INGESTED",text)
         self.assertIn("ONE phase III",text)
+    def test_negative_controls_detect_corrupted_source_fixture(self):
+        d=fake_doc("The median PFS by BICR was 7.9 months with Dato-DXd versus 4.9 months with ICC.")
+        tests=negative_control_benchmark({"PMC11771365":d})
+        false_month=next(x for x in tests if x["test"]=="false_pfs_month")
+        self.assertFalse(false_month["passed"])
+        self.assertEqual(false_month["observed"],"SOURCE_CONTEXT_MATCH_REVIEW_REQUIRED")
     def test_rob2_not_auto_scored(self):
         self.assertEqual(len(reviewer_questions()),5)
         text=brief_markdown([],[],{},1.0)
