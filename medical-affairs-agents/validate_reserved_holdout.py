@@ -23,13 +23,10 @@ def validate_holdout(pool, development):
     if pool.get("contains_outcome_values") is not False:
         raise ValueError("An independent reserved manifest must not contain outcomes")
     dev={s["nct"].upper() for s in development.get("studies",[])}
-    excluded={
-        "NCT05104866","NCT03725059","NCT05375461","NCT06311383",
-        "NCT04191499_NONEXISTENT_STUB"
-    }
-    # Exclude previously inspected holdout manuscript families when known;
-    # exclusion of INAVO120 here would conflict with its new allocation;
-    # prior V2/V3 were different families and are recorded in provenance.
+    # Previously inspected V1 holdout NCTs and original TROPION study;
+    # V2/V3 also used distinct named families, checked in this manifest's
+    # study-level identity audit. Do not insert invented trial identifiers.
+    excluded={"NCT05104866","NCT03725059","NCT05375461","NCT06311383"}
     selected=set()
     pmids=set()
     for study in studies:
