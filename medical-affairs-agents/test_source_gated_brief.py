@@ -57,7 +57,6 @@ class StrictSourceReportTests(unittest.TestCase):
     def test_report_never_conflates_pfs_and_os(self):
         fake_struct={"PMC11771365":{"tables":[],"figures_count":0,"supplement_markers":0}}
         text=brief_markdown([],[],fake_struct,0.1)
-        self.assertIn("did not show a statistically significant",text.lower()) if False else None
         self.assertIn("No statistically significant overall-survival difference",text)
         self.assertIn("PFS conclusion BLOCKED",text)
         self.assertIn("NOT_MACHINE_INGESTED",text)
@@ -66,7 +65,7 @@ class StrictSourceReportTests(unittest.TestCase):
         self.assertEqual(len(reviewer_questions()),5)
         text=brief_markdown([],[],{},1.0)
         self.assertIn("UNSCORED",text)
-        self.assertIn("not formal RoB 2",text)
+        self.assertIn("signalling-question judgments",text)
         self.assertNotIn("Low risk of bias: confirmed",text)
 
 if __name__=="__main__":
