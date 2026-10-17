@@ -19,21 +19,19 @@ jobs:
           python-version: '3.11'
       - name: Run unit tests
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
-      - name: Retrieve open access full-text and extract evidence
+      - name: Retrieve permitted JATS and extract source candidates
         run: |
-          python medical-affairs-agents/fulltext_evidence.py \
-            --query '"breast cancer" AND HER2' \
-            --limit 3 \
-            --out medical-affairs-agents/output/fulltext_evidence.md
-      - name: Build cross-study candidate evidence matrix
+          python medical-affairs-agents/clinical_effects_v3.py \
+            --pmcids PMC12494613 \
+            --out medical-affairs-agents/output/fulltext_smoke_safe
+      - name: Produce unapproved reviewer queue (no clinical conclusions)
         run: |
-          python medical-affairs-agents/compare_studies.py \
-            --query '"breast cancer" AND HER2' \
-            --limit 3 \
-            --out medical-affairs-agents/output/cross_study_candidates.md
-      - name: Upload report
+          python medical-affairs-agents/evidence_review_queue.py \
+            --input medical-affairs-agents/output/fulltext_smoke_safe/v3_effect_candidates.json \
+            --out medical-affairs-agents/output/fulltext_smoke_safe
+      - name: Upload permitted metadata and evidence candidates only
         uses: actions/upload-artifact@v4
         with:
-          name: oncology-fulltext-evidence-demo
-          path: medical-affairs-agents/output/*.md
+          name: ontology-fulltext-smoke-safe
+          path: medical-affairs-agents/output/fulltext_smoke_safe/
           retention-days: 14
