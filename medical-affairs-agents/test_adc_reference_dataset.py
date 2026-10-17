@@ -172,6 +172,21 @@ class ADCReferenceTests(unittest.TestCase):
         self.assertEqual(len(results),10)
         with self.assertRaises(ValueError):fetch_pmids_batch(["not_an_id"])
 
+    def test_source_identity_mismatch_fails_real_workflow_gate(self):
+        from unittest.mock import patch
+        from tempfile import TemporaryDirectory
+        from adc_reference_dataset import run
+        records={s["pmid"]:fake_record(s) for s in SEED["studies"]}
+        records[SEED["studies"][1]["pmid"]]["doi"]="10.7777/unrelated"
+        with TemporaryDirectory() as folder:
+            with patch("adc_reference_dataset.fetch_pmids_batch",return_value=records):
+                with patch("adc_reference_dataset.fetch_ncbi_trial_registrations",return_value=[]):
+                    with self.assertRaises(RuntimeError):
+                        run(dest=folder)
+            audit=json.loads((Path(folder)/"adc_source_audit.json").read_text())
+            self.assertEqual(audit["source_pmid_doi_matches"],9)
+            self.assertEqual(audit["statistically_validated_outcome_count"],0)
+
     def test_modified_ci_outside_estimate_rejected(self):
         b=copy.deepcopy(SEED)
         b["studies"][0]["ci_lower"]=0.80
