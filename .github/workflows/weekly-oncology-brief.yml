@@ -1,0 +1,36 @@
+name: Weekly Public Oncology Research Brief
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 13 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  build-public-brief:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile Python source
+        run: python -m compileall -q medical-affairs-agents
+      - name: Run offline tests
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Retrieve public PubMed records
+        run: |
+          python medical-affairs-agents/research_brief.py \
+            --max-results 10 \
+            --since 2024/01/01 \
+            --out medical-affairs-agents/output/public_breast_cancer_brief.md
+      - name: Archive generated public report
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-oncology-brief
+          path: medical-affairs-agents/output/public_breast_cancer_brief.md
+          retention-days: 30
