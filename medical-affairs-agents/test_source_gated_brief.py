@@ -52,6 +52,13 @@ class StrictSourceReportTests(unittest.TestCase):
         d=fake_doc("The median PFS by BICR was 6.9 months with Dato-DXd versus 4.9 months with ICC.",category="other")
         self.assertEqual(verify_claim(s,{"PMC11771365":d})["status"],
                          "BLOCKED_CONTEXT_NOT_FOUND")
+    def test_safety_result_is_allowed_in_safety_section(self):
+        s=next(s for s in CLAIMS if s["id"]=="safety_grade3")
+        d={"pmcid":"PMC13449377","url":"https://europepmc.org/articles/PMC13449377",
+           "sections":{"safety":[{"id":"PMC13449377-p10","heading":"Results > Safety",
+                   "text":"The rate of grade ≥3 TRAEs with Dato-DXd was lower than with ICC (22.2% versus 45.6%)."}]}}
+        self.assertEqual(verify_claim(s,{"PMC13449377":d})["status"],
+                         "SOURCE_CONTEXT_MATCH_REVIEW_REQUIRED")
     def test_missing_source_is_not_success(self):
         self.assertEqual(verify_claim(CLAIMS[0],{})["status"],"BLOCKED_SOURCE_MISSING")
     def test_report_never_conflates_pfs_and_os(self):
