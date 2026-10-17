@@ -14,7 +14,7 @@ DEFAULT_QUERY = '("breast neoplasms"[MeSH Terms] OR "breast cancer"[Title/Abstra
 
 
 def get_bytes(endpoint: str, params: dict[str, str]) -> bytes:
-    params = {**params, "tool": "public_oncology_brief_demo", "email": "demo@example.org"}
+    params = {**params, "tool": "public_oncology_brief_demo"}
     url = BASE + endpoint + "?" + urllib.parse.urlencode(params)
     request = urllib.request.Request(url, headers={"User-Agent": "PublicOncologyBriefDemo/0.1"})
     with urllib.request.urlopen(request, timeout=25) as response:
@@ -73,7 +73,7 @@ def render_markdown(articles, query: str, generated_on: str):
         "# Oncology Public Literature Brief — DEMO",
         "", f"Generated (UTC date): {generated_on}", "",
         "Source: PubMed public metadata. Retrieval does not establish clinical relevance.",
-        "", f"Search query: \`{query}\`", "",
+        "", f"Search query: {query}", "",
         "## Retrieved papers", "",
     ]
     if not articles:
