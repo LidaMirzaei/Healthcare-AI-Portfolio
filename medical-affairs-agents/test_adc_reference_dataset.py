@@ -5,7 +5,8 @@ import unittest
 from pathlib import Path
 from adc_reference_dataset import (
     DEFAULT_SEED, check_reference_schema, evaluate_source,
-    has_exact_number, norm, build_report, parse_ncbi_trial_registrations
+    has_exact_number, norm, build_report, parse_ncbi_trial_registrations,
+    select_batched_originals, fetch_pmids_batch
 )
 
 SEED=json.loads(DEFAULT_SEED.read_text(encoding="utf-8"))
@@ -89,7 +90,7 @@ class ADCReferenceTests(unittest.TestCase):
     def test_source_number_presence_not_scientific_validation(self):
         study=SEED["studies"][0]
         s=evaluate_source(study,fake_record(study))
-        self.assertEqual(s["verification_status"],"ABSTRACT_NUMBER_TOKENS_LOCATED_REVIEW_REQUIRED")
+        self.assertEqual(s["verification_status"],"ABSTRACT_LOCAL_STATISTIC_CANDIDATE_REVIEW_REQUIRED")
         self.assertFalse(s["human_adjudicated"])
         self.assertTrue(s["not_for_treatment_comparison"])
         self.assertFalse(s["source_contains_original_full_text"])
@@ -119,6 +120,44 @@ class ADCReferenceTests(unittest.TestCase):
         from xml.etree import ElementTree as ET
         with self.assertRaises(ET.ParseError):
             parse_ncbi_trial_registrations(b"not xml")
+
+    def test_disconnected_numbers_are_not_a_verified_result(self):
+        study=SEED["studies"][0]
+        misplaced=(study["nct"]+" PFS. Sample age ratio 0.63 was recorded. "
+                   "An unrelated OS cohort reported hazard ratio 0.88 "
+                   "(95% CI 0.52 to 0.76).")
+        checked=evaluate_source(study,fake_record(study,abstract=misplaced))
+        self.assertTrue(checked["checks"]["estimate_number_token_found"])
+        self.assertFalse(checked["checks"]["local_statistic_endpoint_candidate"])
+        self.assertIn("INCOMPLETE",checked["verification_status"])
+
+    def test_bulk_select_only_exact_original_pubmed_ids(self):
+        req=[SEED["studies"][0]["pmid"],SEED["studies"][1]["pmid"]]
+        payload={"resultList":{"result":[
+           {"id":req[0],"source":"MED"},
+           {"id":req[1],"source":"MED"},
+           {"id":"00000000","source":"MED"},
+           {"id":req[0],"source":"PMC"}]}}
+        matched=select_batched_originals(payload,req)
+        self.assertEqual(set(matched),set(req))
+        payload["resultList"]["result"].append({"id":req[0],"source":"MED"})
+        with self.assertRaises(ValueError):select_batched_originals(payload,req)
+
+    def test_one_bounded_query_replaces_serial_requests(self):
+        from unittest.mock import patch
+        import io
+        ids=[s["pmid"] for s in SEED["studies"]]
+        stub={"resultList":{"result":[
+            {"id":i,"source":"MED"} for i in ids]}}
+        sent=[]
+        def fake_open(request,timeout):
+            sent.append(request.full_url)
+            return io.BytesIO(json.dumps(stub).encode())
+        with patch("adc_reference_dataset.urllib.request.urlopen",fake_open):
+            results=fetch_pmids_batch(ids)
+        self.assertEqual(len(sent),1)
+        self.assertEqual(len(results),10)
+        with self.assertRaises(ValueError):fetch_pmids_batch(["not_an_id"])
 
     def test_modified_ci_outside_estimate_rejected(self):
         b=copy.deepcopy(SEED)
