@@ -1,0 +1,90 @@
+{
+  "schema_version": 2,
+  "project": "Breast Cancer Clinical Effect Extraction — frozen independent study-family evaluation",
+  "created_on": "2026-10-17",
+  "development_family_ids": [
+    "NCT05104866"
+  ],
+  "not_in_development": [
+    "CCTG MA.38",
+    "HER2 neoadjuvant international cohort",
+    "SweBCG91RT biomarker analysis",
+    "LEONARDA-1"
+  ],
+  "purpose": "Once-only, predeclared clinical numerical extraction sanity audit on independent article families. No fine-tuning on these labels after scoring.",
+  "references": [
+    {
+      "pmcid": "PMC12613153",
+      "doi": "10.1158/2767-9764.CRC-25-0346",
+      "study_family": "CCTG MA.38",
+      "year": 2025,
+      "license_expected": "CC BY 4.0",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/41123599/",
+      "expected": {
+        "kind": "numeric",
+        "endpoint": "PFS",
+        "measure": "HR",
+        "estimate": 0.93,
+        "ci_level": 90,
+        "ci_lower": 0.66,
+        "ci_upper": 1.3
+      },
+      "provenance": "Original trial abstract: randomized phase II, continuous versus standard-dose palbociclib; confidence interval is 90%, not 95%."
+    },
+    {
+      "pmcid": "PMC12559113",
+      "doi": "10.1007/s12094-025-03937-7",
+      "study_family": "HER2 neoadjuvant international cohort",
+      "year": 2025,
+      "license_expected": "CC BY 4.0",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12559113/",
+      "expected": {
+        "kind": "numeric",
+        "endpoint": "pCR",
+        "measure": "OR",
+        "estimate": 0.459,
+        "ci_level": 95,
+        "ci_lower": 0.289,
+        "ci_upper": 0.728
+      },
+      "provenance": "Original Results, multivariate pCR model; odds ratio describes association with hormone-receptor status, NOT randomized treatment effect."
+    },
+    {
+      "pmcid": "PMC12208964",
+      "study_family": "SweBCG91RT biomarker analysis",
+      "year": 2025,
+      "license_expected": "CC BY 4.0",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12208964/",
+      "expected": {
+        "kind": "do_not_conflate",
+        "description": "RT hazard ratios reported for high, medium and low biomarker subgroups; no unqualified pooled treatment HR should be asserted."
+      },
+      "provenance": "Original Results: multiple subgroup-specific HRs; this test is a false-pooling guard, not a test of exact effect extraction."
+    },
+    {
+      "pmcid": "PMC11739584",
+      "doi": "10.1038/s41467-025-56096-2",
+      "study_family": "LEONARDA-1",
+      "year": 2025,
+      "license_expected": "CC BY-NC-ND 4.0",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/39820749/",
+      "expected": {
+        "kind": "license_block",
+        "description": "Current conservative commercial-intent public demo does not mine full text licensed CC BY-NC-ND without separate rights."
+      }
+    }
+  ],
+  "evaluation_policy": {
+    "trial_family_disjoint": true,
+    "labels_never_imported_by_extractor": true,
+    "scoring": "Report individual exact effect+CI matches and correct abstention/blocks, plus all extra unverified candidates; never claim clinical accuracy from these four checks.",
+    "frozen": "Do not change V2 expected labels after first scoring to inflate results; create new evaluation set for subsequent versions.",
+    "not_scored": [
+      "endpoint completeness",
+      "study-wide methodological correctness",
+      "patient safety judgments",
+      "scientific reasoning",
+      "full reference and table coverage"
+    ]
+  }
+}
