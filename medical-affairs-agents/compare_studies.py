@@ -5,7 +5,7 @@ This is deterministic information retrieval, NOT independent scientific reasonin
 import argparse
 import re
 from pathlib import Path
-from fulltext_evidence import fetch,search,parse_xml
+from fulltext_evidence import fetch, search, parse_xml, authorized_xml_for_public_demo
 
 FIELDS = {
     "study_design": re.compile(r"\b(?:randomized|randomised|prospective|retrospective|phase [I,V]+|cohort|case.control)\b", re.I),
@@ -78,7 +78,11 @@ def main():
         pmcid=item.get("pmcid")
         if not pmcid: continue
         try:
-            documents.append(candidate_matrix(parse_xml(fetch("https://www.ebi.ac.uk/europepmc/webservices/rest/"+pmcid+"/fullTextXML"),pmcid)))
+            article_xml=fetch("https://www.ebi.ac.uk/europepmc/webservices/rest/"+pmcid+"/fullTextXML")
+            if not authorized_xml_for_public_demo(article_xml):
+                print("Skipped restricted/unknown-license full text",pmcid)
+                continue
+            documents.append(candidate_matrix(parse_xml(article_xml,pmcid)))
         except Exception as exc:
             print("Skipped",pmcid,type(exc).__name__,str(exc))
     if not documents:
