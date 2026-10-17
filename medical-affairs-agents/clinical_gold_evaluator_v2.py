@@ -190,12 +190,22 @@ def main():
     p.add_argument("--gold",required=True)
     p.add_argument("--predictions",required=True)
     p.add_argument("--train-families",nargs="*",default=[])
+    p.add_argument("--reserved",required=True,
+                   help="Frozen reserved trial family manifest with NO outcome labels")
+    p.add_argument("--development-seed",required=True,
+                   help="Pinned original development source registry")
     p.add_argument("--out",required=True)
     args=p.parse_args()
     gold=json.loads(Path(args.gold).read_text(encoding="utf-8"))
     data=json.loads(Path(args.predictions).read_text(encoding="utf-8"))
+    pool=json.loads(Path(args.reserved).read_text(encoding="utf-8"))
+    seed=json.loads(Path(args.development_seed).read_text(encoding="utf-8"))
+    from validate_reserved_holdout import validate_holdout
+    validate_holdout(pool,seed)
+    reserved={s["trial_family_id"] for s in pool["studies"]}
+    trained=set(args.train_families)|{s["nct"] for s in seed["studies"]}
     scored=metrics(gold,data.get("articles",data.get("records",[])),
-                   training_families=args.train_families)
+                   training_families=trained,eligible_test_families=reserved)
     dest=Path(args.out);dest.parent.mkdir(parents=True,exist_ok=True)
     dest.write_text(json.dumps(scored,indent=2),encoding="utf-8")
     print("NUMERIC_TRUE_POSITIVES",scored["numeric_tuple"]["tp"])
