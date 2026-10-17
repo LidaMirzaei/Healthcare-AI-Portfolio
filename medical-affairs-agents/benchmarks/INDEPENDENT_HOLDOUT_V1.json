@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "name": "Frozen independent-trial holdout: breast cancer 2025-2026",
+  "purpose": "Prevent tuning/evaluating only on TROPION-Breast01 publications. Gold fields come from original publications and are used for evaluation only, NEVER extraction rules.",
+  "freeze_policy": "Once this file is committed, never modify the holdout labels to improve a score. New studies go into a new version with independent curation.",
+  "train_trials": [
+    "NCT05104866"
+  ],
+  "holdout": [
+    {
+      "pmcid": "PMC11835712",
+      "doi": "10.1038/s41591-024-03415-7",
+      "trial_id": "NCT03725059",
+      "expected_design": "randomized",
+      "expected_setting": "early",
+      "year": 2025,
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11835712/",
+      "notes": "KEYNOTE-756: early-stage ER+/HER2-; primary pCR and EFS; EFS immature at reported interim."
+    },
+    {
+      "pmcid": "PMC12714862",
+      "doi": "10.1038/s41392-025-02475-6",
+      "trial_id": "NCT05375461",
+      "expected_design": "randomized",
+      "expected_setting": "advanced",
+      "year": 2025,
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12714862/",
+      "notes": "Culmerciclib+fulvestrant phase III in pretreated advanced HR+/HER2-."
+    },
+    {
+      "pmcid": "PMC13139987",
+      "doi": "10.1002/ijc.70397",
+      "trial_id": "NCT06311383",
+      "expected_design": "observational",
+      "expected_setting": "advanced",
+      "year": 2026,
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13139987/",
+      "notes": "RIBANNA: prospective non-interventional; findings not causal randomized efficacy."
+    }
+  ],
+  "license_policy": "For automated extraction in this commercial-intent prototype, only unambiguous CC BY, CC0. No NC, ND, unknown, mixed licenses without legal review. This is conservative and not legal advice.",
+  "metrics_note": "This is a SMALL, purposively selected holdout, NOT a statistically reliable real-world accuracy estimate. Outcomes/figures/medical conclusions are not scored."
+}
