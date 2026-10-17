@@ -6,6 +6,8 @@ on:
     paths:
       - 'medical-affairs-agents/pinned_trial_review.py'
       - 'medical-affairs-agents/test_pinned_trial_review.py'
+      - 'medical-affairs-agents/source_audit.py'
+      - 'medical-affairs-agents/test_source_audit.py'
       - '.github/workflows/pinned-breast-trial-review.yml'
 
 permissions:
@@ -24,6 +26,8 @@ jobs:
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
       - name: Retrieve full text for three preselected TROPION-Breast01 articles
         run: python medical-affairs-agents/pinned_trial_review.py
+      - name: Audit complete source paragraphs and table coverage
+        run: python medical-affairs-agents/source_audit.py
       - name: Upload evidence extraction and measured runtime
         uses: actions/upload-artifact@v4
         with:
