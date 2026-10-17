@@ -50,6 +50,19 @@ class ADCReferenceTests(unittest.TestCase):
         b=next(x for x in bad["studies"] if x["key"]=="DESTINY-Breast04")
         b["ci_lower"]=0.50
         with self.assertRaises(ValueError):check_reference_schema(bad)
+    def test_tropion_breast02_has_dual_primary_pfs_and_os(self):
+        study=next(s for s in SEED["studies"] if s["key"]=="TROPION-Breast02")
+        self.assertEqual(study["outcome_role"],"dual_primary")
+        self.assertIn("95.01%",study["note"])
+        self.assertNotIn("verify_protocol",study["outcome_role"])
+
+    def test_quality_report_has_separate_evidence_columns(self):
+        x=build_report(SEED,[],1.0)
+        self.assertIn("Original PMID + DOI",x)
+        self.assertIn("Trial registration in PubMed",x)
+        self.assertIn("High-priority safety",x)
+        self.assertIn("Unconfirmed",x)
+
     def test_99_confidence_interval_preserved(self):
         study=next(x for x in SEED["studies"] if x["key"]=="TROPION-Breast02")
         self.assertEqual(study["ci_level"],99)
