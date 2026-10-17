@@ -85,7 +85,8 @@ class GeneralExtractionTests(unittest.TestCase):
         self.assertFalse(d["candidates"])
 
     def test_multiple_endpoints_not_laundered(self):
-        d=extract_v3(sample(paragraph="PFS and OS HR 0.90 (95% CI 0.80–1.00) in one ambiguous model."),
+        d=extract_v3(sample(paragraph="PFS and OS HR 0.90 (95% CI 0.80–1.00) in one ambiguous model.",
+                             abstract="Abstract without quantitative effects."),
                      "PMC77777777")
         self.assertEqual(d["matched_effect_count"],0)
         self.assertGreaterEqual(d["abstained_effect_count"],1)
