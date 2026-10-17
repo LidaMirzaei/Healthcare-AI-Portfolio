@@ -57,7 +57,14 @@
       "other_effects_unscored": [
         "150mg HR 0.64 (0.46–0.89) in original abstract, CI level not explicitly adjacent; do not invent the level"
       ],
-      "negative_findings": "2025 erratum; original source version and corrections require expert review before medical communication."
+      "negative_findings": "2025 erratum; original source version and corrections require expert review before medical communication.",
+      "no_assumed_CI_controls": [
+        {
+          "measure": "HR",
+          "estimate": 0.64,
+          "reason": "HR interval bounds occur without locally explicit CI confidence level in original abstract."
+        }
+      ]
     },
     {
       "pmid": "37086745",
@@ -70,7 +77,14 @@
       "other_effects_unscored": [
         "PFS HR 0.36 [0.28–0.45] appears in abstract without an explicitly attached CI level; do not infer 95% from separate arm median confidence intervals"
       ],
-      "negative_findings": "Drug-related ILD ~10% with two grade-5 deaths in T-DXd treated arm; comparator details, denominator, source tables and study version require review."
+      "negative_findings": "Drug-related ILD ~10% with two grade-5 deaths in T-DXd treated arm; comparator details, denominator, source tables and study version require review.",
+      "no_assumed_CI_controls": [
+        {
+          "measure": "HR",
+          "estimate": 0.36,
+          "reason": "Brackets list bounds but not a CI level alongside HR; never invent 95% from earlier median intervals."
+        }
+      ]
     }
   ],
   "no_licensed_fulltext_export": true,
