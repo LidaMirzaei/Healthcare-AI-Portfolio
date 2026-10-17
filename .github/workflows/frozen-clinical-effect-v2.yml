@@ -1,0 +1,30 @@
+name: Frozen V2 Independent Clinical Effect Evaluation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/frozen-clinical-effect-v2.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  one-time-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run offline Python safety tests
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Run predeclared V2 on new independent studies (one-time audit)
+        run: python medical-affairs-agents/evaluate_effect_holdout_v2.py
+      - name: Archive exact holdout score, abstentions and source pointers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frozen-v2-clinical-effect-scorecard
+          path: medical-affairs-agents/output/v2_effect_holdout/
+          retention-days: 14
