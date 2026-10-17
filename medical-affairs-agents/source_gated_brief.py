@@ -118,7 +118,8 @@ def verify_claim(spec, documents):
     for section, paragraphs in doc["sections"].items():
         # NEVER accept an abstract, introduction, conclusion or discussion
         # repeating a value as proof of the original endpoint result.
-        if section!="results":
+        permitted = ("results", "safety") if spec["category"] == "Safety" else ("results",)
+        if section not in permitted:
             continue
         for p in paragraphs:
             content=normal(p["text"])
