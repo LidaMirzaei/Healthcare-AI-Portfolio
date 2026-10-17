@@ -69,6 +69,25 @@ class GoldBlindPubMedTests(unittest.TestCase):
         self.assertEqual(r["candidates"],[])
         self.assertEqual(r["abstentions"][0]["status"],"ABSTAIN_NO_UNIQUE_ATTACHED_CI")
 
+    def test_treatment_dose_cannot_be_mistaken_for_hazard_ratio(self):
+        text=("Findings: Median PFS was assessed. The hazard ratio for "
+              "fictional drug 75 mg versus comparator was 0.59 "
+              "(90% CI 0.42-0.82), and the hazard ratio for fictional "
+              "drug 150 mg versus comparator was 0.64 (0.46-0.89).")
+        r=interpret_original_record("99991111",stub(text))
+        self.assertEqual([c["estimate"] for c in r["candidates"]],[0.59])
+        self.assertEqual(r["candidates"][0]["ci_level"],90)
+        self.assertFalse(any(c.get("estimate")==75 for c in r["candidates"]))
+        self.assertFalse(any(c.get("estimate")==150 for c in r["candidates"]))
+        self.assertTrue(any(x["status"]=="ABSTAIN_NO_UNIQUE_ATTACHED_CI" for x in r["abstentions"]))
+
+    def test_adjacent_effects_without_dose_still_parse(self):
+        r=interpret_original_record("99991111",stub(
+            "Results: PFS HR 0.71 (95% CI 0.55-0.90), "
+            "and OS HR 0.93 (95% CI 0.70-1.20)."))
+        self.assertEqual([c["endpoint"] for c in r["candidates"]],["PFS","OS"])
+        self.assertEqual([c["estimate"] for c in r["candidates"]],[0.71,0.93])
+
     def test_no_os_from_pfs_background_in_results(self):
         t="Results: Median PFS 4 months (HR 0.50; 95% CI 0.30-0.70)."
         v=interpret_original_record("99991111",stub(t))
