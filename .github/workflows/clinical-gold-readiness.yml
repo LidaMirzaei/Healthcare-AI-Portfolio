@@ -9,6 +9,8 @@ on:
       - 'medical-affairs-agents/clinical_gold_evaluator_v2.py'
       - 'medical-affairs-agents/test_clinical_gold_evaluator_v2.py'
       - 'medical-affairs-agents/benchmarks/GOLD_REVIEW_PROTOCOL.md'
+      - 'medical-affairs-agents/benchmarks/ORIGINAL_ABSTRACT_PILOT_SOURCE_CROSSCHECK.json'
+      - 'medical-affairs-agents/test_original_abstract_pilot_crosscheck.py'
       - 'medical-affairs-agents/validate_reserved_holdout.py'
       - 'medical-affairs-agents/test_validate_reserved_holdout.py'
       - 'medical-affairs-agents/benchmarks/RESERVED_V4_TRIAL_FAMILIES.json'
@@ -56,6 +58,11 @@ jobs:
             --queue medical-affairs-agents/output/gold_readiness/reference_review_queue.json \
             --reviewer-id REVIEWER_B_UNASSIGNED \
             --out medical-affairs-agents/output/gold_readiness/reviewer_B_BLANK.json
+      - name: Bundle source-crosscheck pilot and reviewer protocol as unapproved references
+        run: |
+          cp medical-affairs-agents/benchmarks/ORIGINAL_ABSTRACT_PILOT_SOURCE_CROSSCHECK.json medical-affairs-agents/output/gold_readiness/
+          cp medical-affairs-agents/benchmarks/GOLD_REVIEW_PROTOCOL.md medical-affairs-agents/output/gold_readiness/
+          cp medical-affairs-agents/benchmarks/RESERVED_V4_TRIAL_FAMILIES.json medical-affairs-agents/output/gold_readiness/
       - name: Archive traceable review work, not manufactured clinical gold
         if: always()
         uses: actions/upload-artifact@v4
