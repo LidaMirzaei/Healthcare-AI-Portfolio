@@ -114,7 +114,13 @@ def ratio_effects(results):
             "clinical_claim_approved":False,
         }
         if len(intervals)!=1:
-            abstained.append(dict(base,status="ABSTAIN_NO_UNIQUE_ATTACHED_CI"))
+            following=[ci.start()-ratio.end() for ci in cis if ci.start()>=ratio.end()]
+            abstained.append(dict(
+                base,status="ABSTAIN_NO_UNIQUE_ATTACHED_CI",
+                observed_effect_number=float(ratio.group("point")),
+                parsed_CI_count_in_results=len(cis),
+                local_CI_count=len(intervals),
+                next_parsed_CI_distance=min(following) if following else None))
             continue
         if label.startswith(("ENDPOINT_","AMBIGUOUS")):
             abstained.append(dict(base,status="ABSTAIN_ENDPOINT_UNCERTAIN"))
@@ -233,6 +239,14 @@ def main():
     print("SHADOW_SOURCE_RESOLVED",results["resolved"],"/",results["requested"])
     print("SHADOW_NUMERIC_CANDIDATES",sum(len(a["candidates"]) for a in results["articles"]))
     print("SHADOW_ABSTENTIONS",sum(len(a["abstentions"]) for a in results["articles"]))
+    for article in results["articles"]:
+        for a in article.get("abstentions",[]):
+            if a.get("status")=="ABSTAIN_NO_UNIQUE_ATTACHED_CI":
+                print("SHADOW_ABSTAIN_DIAGNOSTIC",article["pmid"],
+                      a.get("observed_effect_number"),
+                      "RESULTS_CI_COUNT",a.get("parsed_CI_count_in_results"),
+                      "NEAREST_CI_DISTANCE",a.get("next_parsed_CI_distance"))
+
     print("SHADOW_SOURCE_SECONDS",results["seconds"])
     if results["resolved"]!=results["requested"]:
         raise RuntimeError("At least one original PubMed source is missing; shadow outcome assessment is incomplete")
