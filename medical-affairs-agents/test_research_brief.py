@@ -22,5 +22,12 @@ class BriefTests(unittest.TestCase):
         self.assertIn("human scientific review required", brief)
         self.assertIn("No LLM is used", brief)
 
+    def test_empty_pubmed_response(self):
+        self.assertEqual(parse_pubmed_xml(b"<PubmedArticleSet/>"), [])
+
+    def test_no_results_rendered(self):
+        text = render_markdown([], "breast cancer", "2026-10-17")
+        self.assertIn("No matching articles retrieved.", text)
+
 if __name__ == "__main__":
     unittest.main()
