@@ -138,6 +138,21 @@ class GoldBlindPubMedTests(unittest.TestCase):
         self.assertTrue(all(x["clinical_approval_count"]==0 for x in value["articles"]))
         self.assertNotIn("expected",value)
 
+    def test_structured_pubmed_middle_dot_decimals_are_not_zero(self):
+        source={"status":"ORIGINAL_PUBMED_XML_RESULTS_TAGGED",
+                "verified_original_pmid":True,
+                "results":"Median PFS was 7·2 months; the hazard ratio for "
+                          "fictional drug 75 mg versus comparator was 0·59 "
+                          "(90% CI 0·42-0·82; p=0·017)."}
+        doc=interpret_original_record("99991111",stub("No external copy needed"),source)
+        self.assertEqual(len(doc["candidates"]),1)
+        val=doc["candidates"][0]
+        self.assertEqual((val["estimate"],val["ci_lower"],val["ci_upper"]),
+                         (0.59,0.42,0.82))
+        self.assertEqual(val["ci_level"],90)
+        self.assertFalse(any(x.get("observed_effect_number")==0
+                             for x in doc["abstentions"]))
+
     def test_original_tagged_results_take_priority_and_exclude_background(self):
         t=("Background: Prior PFS HR 0.01 (95% CI 0.001-0.02). "
            "Results: PFS HR 0.63 (95% CI 0.52-0.76).")
