@@ -179,7 +179,10 @@ def interpret_original_record(pmid, record, structured=None):
     if not doi or not re.match(r"^10\.\d{4,9}/",doi):
         raise ValueError("Missing original article DOI")
     if structured and structured.get("status")=="ORIGINAL_PUBMED_XML_RESULTS_TAGGED" and structured.get("verified_original_pmid") is True:
-        results=structured["results"]
+        # NCBI XML uses middle-dot clinical decimals (e.g. 0·59) in
+        # Lancet publications. Normalize typography BEFORE regex parsing,
+        # otherwise "0·59" may be misread as the value zero.
+        results=norm(structured["results"])
         status="ORIGINAL_PUBMED_XML_RESULTS_TAGGED"
     else:
         results,status=get_results_only(record.get("abstractText",""))
