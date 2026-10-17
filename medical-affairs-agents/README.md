@@ -70,3 +70,16 @@ See [COST_AND_PRIVACY_POLICY.md](COST_AND_PRIVACY_POLICY.md). **No paid models, 
 - [PubMed E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25499/)
 - [Cochrane Handbook — risk of bias](https://training.cochrane.org/handbook/current/chapter-08)
 - [Elsevier TDM policy: corporate subscriptions](https://www.elsevier.com/about/policies-and-standards/text-and-data-mining)
+
+
+### Clinical effect extraction: new robustness results
+
+**Frozen V2 (first unseen test): 2/4 predeclared checks**; 2 numerical results missed, one subgroup ambiguity guard passed, one restricted-rights gate passed. [V2 scorecard](benchmarks/EFFECT_HOLDOUT_V2_FROZEN.json). This run has already been inspected and **must not be reused as an unseen evaluation**.
+
+**Frozen V3 (new article families): 3/5 predeclared checks**. On the original Results of an independent 2025 **observational** screening cohort, the generic V3 extractor located BCSS HR 0.28 (95% CI 0.17–0.48) and OS HR 0.54 (95% CI 0.36–0.79), each as an **unverified association**, not a causal treatment claim. A separate restricted-license control was blocked. Two other article-type checks were **not passed because the licensing gate blocked their source before scientific classification** (one ambiguous metadata record, one explicitly restrictive licence). [V3 frozen manifest](benchmarks/EFFECT_HOLDOUT_V3_FROZEN.json).
+
+Current software suite: **84 offline tests** passed in the V3 run. That number measures software tests, **not clinical accuracy**. The V2 and V3 scores are tiny targeted *engineering* audits, not statistical precision or recall. The clinical domain reviewer gold set is **not yet populated or approved**.
+
+For precise failure notes, evaluation definitions, and a reviewer annotation template, see [Validation baseline](benchmarks/VALIDATION_BASELINE_AND_RELEASE_GATES.md) and [blank gold annotation schema](benchmarks/CLINICAL_ANNOTATION_TEMPLATE.csv). Do not edit previously observed holdout values to inflate results.
+
+**New experimental scripts:** [clinical_effects.py](clinical_effects.py), [clinical_effects_v3.py](clinical_effects_v3.py), [evaluate_effect_holdout_v2.py](evaluate_effect_holdout_v2.py), and [evaluate_effect_holdout_v3.py](evaluate_effect_holdout_v3.py). None is an independently validated AI medical reasoning engine. V3 supports numeric source candidates across separate original papers, distinguishes abstract/full-text sources, captures CI levels, and clearly abstains when evidence is uncertain.
