@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 from adc_reference_dataset import fetch_pmids_batch, fetch_pmid, norm
+from pubmed_xml_results import fetch_results_batch
 
 # Values are NEVER drawn from evaluation/gold files.
 RATIO=re.compile(
@@ -145,13 +146,17 @@ def risk_language(results, abstract):
     return warnings
 
 
-def interpret_original_record(pmid, record):
+def interpret_original_record(pmid, record, structured=None):
     if str(record.get("id",""))!=str(pmid) or record.get("source")!="MED":
         raise ValueError("Original PubMed record identity mismatch")
     doi=str(record.get("doi") or "").lower().strip()
     if not doi or not re.match(r"^10\.\d{4,9}/",doi):
         raise ValueError("Missing original article DOI")
-    results, status=get_results_only(record.get("abstractText",""))
+    if structured and structured.get("status")=="ORIGINAL_PUBMED_XML_RESULTS_TAGGED" and structured.get("verified_original_pmid") is True:
+        results=structured["results"]
+        status="ORIGINAL_PUBMED_XML_RESULTS_TAGGED"
+    else:
+        results,status=get_results_only(record.get("abstractText",""))
     allowed=[]
     abstained=[]
     if results:
@@ -180,6 +185,12 @@ def collect(pmids):
         by_id=fetch_pmids_batch(pmids)
     except (OSError,ValueError,TimeoutError):
         by_id={}
+    # Retrieve original NCBI-tagged Results separately, with no label/benchmark
+    # access and no full-text article request. Unstructured abstracts abstain.
+    try:
+        structured=fetch_results_batch(pmids)
+    except (OSError,ValueError,TimeoutError):
+        structured={}
     fetched=0
     docs=[]
     for pmid in pmids:
@@ -188,7 +199,7 @@ def collect(pmids):
             if rec is None:
                 rec=fetch_pmid(pmid)
             fetched+=1
-            docs.append(interpret_original_record(pmid,rec))
+            docs.append(interpret_original_record(pmid,rec,structured.get(pmid)))
         except (OSError,ValueError,TimeoutError) as exc:
             docs.append({
                 "pmid":pmid,"source_status":"BLOCKED_ORIGINAL_PUBMED_MISSING",
@@ -202,6 +213,7 @@ def collect(pmids):
         "verified_medical_claim_count":0,
         "pmids":pmids,
         "requested":len(pmids),"resolved":fetched,
+        "source_sections_resolved_by_original_xml":sum(x.get("source_status")=="ORIGINAL_PUBMED_XML_RESULTS_TAGGED" for x in docs),
         "seconds":round(time.perf_counter()-begin,3),
         "articles":docs,
     }
