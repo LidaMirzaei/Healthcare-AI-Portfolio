@@ -1,0 +1,29 @@
+name: Medical Affairs Agent — Python tests
+
+on:
+  push:
+    paths:
+      - 'medical-affairs-agents/**'
+      - '.github/workflows/medical-affairs-agent-tests.yml'
+  pull_request:
+    paths:
+      - 'medical-affairs-agents/**'
+      - '.github/workflows/medical-affairs-agent-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile scripts
+        run: python -m compileall -q medical-affairs-agents
+      - name: Run offline unit tests
+        run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
