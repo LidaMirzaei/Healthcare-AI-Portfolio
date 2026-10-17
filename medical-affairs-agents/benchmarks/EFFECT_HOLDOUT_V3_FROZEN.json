@@ -1,0 +1,91 @@
+{
+  "schema_version": 3,
+  "created_on": "2026-10-17",
+  "name": "Frozen V3 breast oncology prospective effect extraction and abstention",
+  "trained_and_examined_families": [
+    "NCT05104866",
+    "CCTG MA.38",
+    "HER2 neoadjuvant international cohort",
+    "SweBCG91RT",
+    "LEONARDA-1"
+  ],
+  "sources": [
+    {
+      "pmcid": "PMC12494613",
+      "doi": "10.1245/s10434-025-17845-1",
+      "family": "Victoria early breast cancer screening cohort",
+      "type": "observational",
+      "year": 2025,
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12494613/",
+      "checks": [
+        {
+          "type": "exact_association",
+          "endpoint": "OS",
+          "measure": "HR",
+          "value": 0.54,
+          "ci_level": 95,
+          "lower": 0.36,
+          "upper": 0.79,
+          "warning": "Unadjusted screening association, not evidence of randomized screening intervention benefit"
+        },
+        {
+          "type": "exact_association",
+          "endpoint": "BCSS",
+          "measure": "HR",
+          "value": 0.28,
+          "ci_level": 95,
+          "lower": 0.17,
+          "upper": 0.48,
+          "warning": "Unadjusted BC-specific survival association; confounding and lead-time biases require review"
+        }
+      ]
+    },
+    {
+      "pmcid": "PMC12238040",
+      "doi": "10.3389/fonc.2025.1561692",
+      "family": "Prospective metformin TNBC trial protocol",
+      "year": 2025,
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12238040/",
+      "checks": [
+        {
+          "type": "no_observed_outcome_claim",
+          "reason": "A publication describing planned follow-ups is not verified results even if a clinical trial is discussed"
+        }
+      ]
+    },
+    {
+      "pmcid": "PMC12514518",
+      "doi": "10.1016/j.eclinm.2025.103535",
+      "family": "Post-CDK4/6 network meta-analysis",
+      "year": 2025,
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12514518/",
+      "checks": [
+        {
+          "type": "secondary_synthesis_not_independent_trial",
+          "reason": "Network meta-analysis combines original study evidence and must not be counted as a new randomized trial"
+        }
+      ]
+    },
+    {
+      "pmcid": "PMC12736403",
+      "doi": "10.1200/JCO-25-01023",
+      "family": "TNBC platinum randomized trial",
+      "year": 2025,
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12736403/",
+      "checks": [
+        {
+          "type": "license_requires_separate_approval",
+          "reason": "CC BY-NC-ND does not satisfy current conservative public commercial-intent mining gate"
+        }
+      ]
+    }
+  ],
+  "evaluation_policy": {
+    "first_run_only": true,
+    "gold_is_evaluation_only": true,
+    "never_change_labels_after_first_score": true,
+    "not_clinical_precision_recall": true,
+    "not_well_powered": true,
+    "measure": "2 exact source-linked association effects and 3 explicit non-inference safeguards"
+  }
+}
