@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'medical-affairs-agents/adc_reference_dataset.py'
+      - 'medical-affairs-agents/abstract_statistic_verifier.py'
+      - 'medical-affairs-agents/test_abstract_statistic_verifier.py'
       - 'medical-affairs-agents/test_adc_reference_dataset.py'
       - 'medical-affairs-agents/adc_reviewer_worksheet.py'
       - 'medical-affairs-agents/test_adc_reviewer_worksheet.py'
