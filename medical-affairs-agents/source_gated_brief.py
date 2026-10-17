@@ -151,13 +151,13 @@ def negative_control_benchmark(documents):
     """
     altered = [
         ("false_pfs_month", "pfs_global",
-         r"median\\s+PFS.{0,180}?7\\.9\\s+months.{0,200}?versus\\s+4\\.9\\s+months"),
+         r"median\s+PFS.{0,180}?7\.9\s+months.{0,200}?versus\s+4\.9\s+months"),
         ("reversed_pfs_arms", "pfs_global",
-         r"median\\s+PFS.{0,180}?4\\.9\\s+months.{0,200}?versus\\s+6\\.9\\s+months"),
-        ("false_pfs_hr", "pfs_hr", r"HR.{0,8}?9\\.99"),
-        ("reversed_severe_traes", "safety_grade3", r"45\\.6%\\s+versus\\s+22\\.2%"),
+         r"median\s+PFS.{0,180}?4\.9\s+months.{0,200}?versus\s+6\.9\s+months"),
+        ("false_pfs_hr", "pfs_hr", r"HR.{0,8}?9\.99"),
+        ("reversed_severe_traes", "safety_grade3", r"45\.6%\s+versus\s+22\.2%"),
         ("false_china_pfs", "china_pfs",
-         r"median\\s+PFS.{0,130}?18\\.1\\s+months.{0,180}?versus\\s+4\\.2\\s+months"),
+         r"median\s+PFS.{0,130}?18\.1\s+months.{0,180}?versus\s+4\.2\s+months"),
     ]
     ids={s["id"]:s for s in CLAIMS}
     output=[]
