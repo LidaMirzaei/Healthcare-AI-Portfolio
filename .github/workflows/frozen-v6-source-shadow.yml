@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
       - name: Run synthetic safety tests before viewing untouched V6 source outcomes
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
-      - name: "Regression only: original PubMed Results with dose-versus-HR disambiguation"
+      - name: "Regression only: PubMed middle-dot numeric normalization and safe dose/HR parsing"
         run: |
           python medical-affairs-agents/pubmed_shadow_extractor.py \
             --pmids 40454645 39481395 37086745 \
