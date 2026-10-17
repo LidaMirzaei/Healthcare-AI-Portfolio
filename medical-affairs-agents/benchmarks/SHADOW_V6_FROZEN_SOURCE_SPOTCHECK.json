@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "created_date": "2026-10-17",
+  "name": "V6 untouched distinct-family source-abstract engineering evaluation",
+  "status": "PUBLIC_SOURCE_SPOTCHECK_NOT_QUALIFIED_GOLD",
+  "predictor_frozen_before_first_run": true,
+  "pilot_not_used_for_training": true,
+  "study_family_overlap_policy": "Original NCTs distinct from 10 ADC development studies, V1/V2/V3 earlier studies, V4 reserved, and consumed V5.",
+  "sources": [
+    {
+      "pmid": "40454645",
+      "trial_id": "NCT05654623",
+      "name": "VERITAC-2",
+      "doi": "10.1056/NEJMoa2505725",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/40454645/",
+      "context": "ER+/HER2- advanced post-CDK4/6 endocrine setting; subgroup ESR1 mutant vs full population, primary PFS",
+      "expected": [
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.58,
+          "ci_level": 95,
+          "ci_lower": 0.43,
+          "ci_upper": 0.78,
+          "subgroup": "ESR1 mutated, P<.001"
+        },
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.83,
+          "ci_level": 95,
+          "ci_lower": 0.69,
+          "ci_upper": 1.01,
+          "subgroup": "Full trial population, P=.07, not significant"
+        }
+      ],
+      "negative_findings": "Full-population PFS not significantly better than fulvestrant; must not claim overall randomized PFS win."
+    },
+    {
+      "pmid": "39481395",
+      "trial_id": "NCT04214288",
+      "name": "SERENA-2",
+      "doi": "10.1016/S1470-2045(24)00387-5",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/39481395/",
+      "context": "Postmenopausal ER+/HER2- advanced, camizestrant 75mg and 150mg vs fulvestrant, primary PFS, source erratum PMID40049203",
+      "expected": [
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.59,
+          "ci_level": 90,
+          "ci_lower": 0.42,
+          "ci_upper": 0.82,
+          "subgroup": "75mg versus fulvestrant, stated 90% CI"
+        }
+      ],
+      "other_effects_unscored": [
+        "150mg HR 0.64 (0.46–0.89) in original abstract, CI level not explicitly adjacent; do not invent the level"
+      ],
+      "negative_findings": "2025 erratum; original source version and corrections require expert review before medical communication."
+    },
+    {
+      "pmid": "37086745",
+      "trial_id": "NCT03523585",
+      "name": "DESTINY-Breast02",
+      "doi": "10.1016/S0140-6736(23)00725-0",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/37086745/",
+      "context": "HER2-positive metastatic after T-DM1, Daiichi Sankyo/AstraZeneca ADC vs physician choice, PFS primary; serious ILD safety signal",
+      "expected": [],
+      "other_effects_unscored": [
+        "PFS HR 0.36 [0.28–0.45] appears in abstract without an explicitly attached CI level; do not infer 95% from separate arm median confidence intervals"
+      ],
+      "negative_findings": "Drug-related ILD ~10% with two grade-5 deaths in T-DXd treated arm; comparator details, denominator, source tables and study version require review."
+    }
+  ],
+  "no_licensed_fulltext_export": true,
+  "no_medical_gold": false,
+  "rules": "Scores only exact candidate tuples predeclared before execution; never promote absent/unlabelled CI to sourced outcome. Distinct patient populations, publication corrections and serious harms remain specialist-review flags."
+}
