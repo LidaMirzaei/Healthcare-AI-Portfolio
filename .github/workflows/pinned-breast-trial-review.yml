@@ -18,6 +18,8 @@ on:
       - 'medical-affairs-agents/test_independent_holdout.py'
       - 'medical-affairs-agents/content_access.py'
       - 'medical-affairs-agents/test_content_access.py'
+      - 'medical-affairs-agents/rights_preflight.py'
+      - 'medical-affairs-agents/test_rights_preflight.py'
       - 'medical-affairs-agents/benchmarks/INDEPENDENT_HOLDOUT_V1.json'
       - '.github/workflows/pinned-breast-trial-review.yml'
 
@@ -35,19 +37,29 @@ jobs:
           python-version: '3.11'
       - name: Run offline tests
         run: python -m unittest discover -s medical-affairs-agents -p 'test_*.py' -v
+      - name: Check public metadata and per-article reuse rights (no full text)
+        id: rights
+        run: python medical-affairs-agents/rights_preflight.py
       - name: Retrieve full text for three preselected TROPION-Breast01 articles
+        if: steps.rights.outputs.authorized == 'true'
         run: python medical-affairs-agents/pinned_trial_review.py
       - name: Audit complete source paragraphs and table coverage
+        if: steps.rights.outputs.authorized == 'true'
         run: python medical-affairs-agents/source_audit.py
       - name: Audit numeric claims against source paragraphs
+        if: steps.rights.outputs.authorized == 'true'
         run: python medical-affairs-agents/numeric_claim_audit.py
       - name: Cross-check final overall survival against original PubMed abstract
+        if: steps.rights.outputs.authorized == 'true'
         run: python medical-affairs-agents/final_os_source_check.py
       - name: Build strictly source-gated executive brief and table audit
+        if: steps.rights.outputs.authorized == 'true'
         run: python medical-affairs-agents/source_gated_brief.py
       - name: Evaluate frozen independent-trial holdout
+        if: steps.rights.outputs.authorized == 'true'
         run: python medical-affairs-agents/independent_holdout.py
-      - name: Upload evidence extraction and measured runtime
+      - name: Upload rights metadata audit and authorized evidence only
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pinned-breast-trial-evidence-and-timing
