@@ -12,6 +12,8 @@ on:
       - 'medical-affairs-agents/test_numeric_claim_audit.py'
       - 'medical-affairs-agents/source_gated_brief.py'
       - 'medical-affairs-agents/test_source_gated_brief.py'
+      - 'medical-affairs-agents/final_os_source_check.py'
+      - 'medical-affairs-agents/test_final_os_source_check.py'
       - '.github/workflows/pinned-breast-trial-review.yml'
 
 permissions:
@@ -34,6 +36,8 @@ jobs:
         run: python medical-affairs-agents/source_audit.py
       - name: Audit numeric claims against source paragraphs
         run: python medical-affairs-agents/numeric_claim_audit.py
+      - name: Cross-check final overall survival against original PubMed abstract
+        run: python medical-affairs-agents/final_os_source_check.py
       - name: Build strictly source-gated executive brief and table audit
         run: python medical-affairs-agents/source_gated_brief.py
       - name: Upload evidence extraction and measured runtime
