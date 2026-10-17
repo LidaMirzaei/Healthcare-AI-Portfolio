@@ -46,7 +46,8 @@ def score(predictions, frozen):
     for source in src:
         record=docs[source["pmid"]]
         identity=(record.get("doi","").lower()==source["doi"].lower()
-                  and record.get("source_status")=="ABSTRACT_RESULTS_ONLY")
+                  and record.get("source_status") in (
+                      "ABSTRACT_RESULTS_ONLY","ORIGINAL_PUBMED_XML_RESULTS_TAGGED"))
         source_identity_pass+=int(identity)
         candidates=record.get("candidates",[])
         total_candidates+=len(candidates)
