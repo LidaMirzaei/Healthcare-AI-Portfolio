@@ -56,7 +56,7 @@ OS_SOURCE = {
     "url":"https://www.annalsofoncology.org/article/S0923-7534%2825%2906337-9/fulltext",
     "pubmed":"https://pubmed.ncbi.nlm.nih.gov/41448362/",
     "value":"Final OS: median 18.6 vs 18.3 months; HR 1.01 (95% CI 0.83–1.22), P=0.9445",
-    "status":"EXTERNAL_PRIMARY_PUBLICATION_VERIFIED_MANUALLY_NOT_MACHINE_INGESTED",
+    "status":"EXTERNAL_PUBLISHER_SOURCE_CHECKED_NOT_MACHINE_INGESTED",
     "interpretation":"No statistically significant overall-survival difference was shown at the final analysis.",
 }
 
@@ -142,6 +142,31 @@ def verify_claim(spec, documents):
             "source_pmcid":spec["pmcid"],
             "proposed_value":spec["value"],
             "review_status":"PENDING_CLINICAL_REVIEW"}
+
+
+def negative_control_benchmark(documents):
+    """Challenge the real retrieved articles with deliberately false comparisons.
+
+    This is a small regression/sanity benchmark, NOT clinical precision/recall.
+    """
+    altered = [
+        ("false_pfs_month", "pfs_global",
+         r"median\\s+PFS.{0,180}?7\\.9\\s+months.{0,200}?versus\\s+4\\.9\\s+months"),
+        ("reversed_pfs_arms", "pfs_global",
+         r"median\\s+PFS.{0,180}?4\\.9\\s+months.{0,200}?versus\\s+6\\.9\\s+months"),
+        ("false_pfs_hr", "pfs_hr", r"HR.{0,8}?9\\.99"),
+        ("reversed_severe_traes", "safety_grade3", r"45\\.6%\\s+versus\\s+22\\.2%"),
+        ("false_china_pfs", "china_pfs",
+         r"median\\s+PFS.{0,130}?18\\.1\\s+months.{0,180}?versus\\s+4\\.2\\s+months"),
+    ]
+    ids={s["id"]:s for s in CLAIMS}
+    output=[]
+    for ident,source_id,pattern in altered:
+        spec=dict(ids[source_id],pattern=pattern)
+        result=verify_claim(spec,documents)
+        output.append({"test":ident,"expected":"BLOCKED_CONTEXT_NOT_FOUND",
+                       "observed":result["status"],"passed":result["status"]=="BLOCKED_CONTEXT_NOT_FOUND"})
+    return output
 
 
 def reviewer_questions():
@@ -294,6 +319,9 @@ def run(output_dir):
     audited=[verify_claim(spec,documents) for spec in CLAIMS]
     released=[a for a in audited if a["status"]=="SOURCE_CONTEXT_MATCH_REVIEW_REQUIRED"]
     blocked=[a for a in audited if a["status"]!="SOURCE_CONTEXT_MATCH_REVIEW_REQUIRED"]
+    negatives=negative_control_benchmark(documents)
+    if not all(x["passed"] for x in negatives):
+        raise ValueError("Adversarial negative-control claim accepted; refusing evidence release")
     elapsed=time.perf_counter()-start
     dest=Path(output_dir)
     dest.mkdir(parents=True,exist_ok=True)
@@ -301,6 +329,7 @@ def run(output_dir):
          "source_trial":"NCT05104866","independent_trials":1,"article_count":3,
          "source_articles":articles,
          "claims":audited,"external_final_os":OS_SOURCE,
+         "negative_control_benchmark":negatives,
          "automated_source_context_matched":len(released),
          "automated_claims_not_matched":len(blocked),
          "human_validated_claims":0,"formal_rob2_assessed":False,
@@ -316,6 +345,7 @@ def run(output_dir):
     os_audit = json.loads(os_audit_path.read_text(encoding="utf-8")) if os_audit_path.exists() else None
     (dest/"source_gated_executive_brief.md").write_text(
         brief_markdown(released,blocked,structures,elapsed,os_audit),encoding="utf-8")
+    print("NEGATIVE_CONTROLS_BLOCKED",sum(x["passed"] for x in negatives),"/",len(negatives))
     print("SOURCE_CONTEXT_MATCHED",len(released),"BLOCKED",len(blocked))
     for a in audited: print("CLAIM_CHECK",a["id"],a["status"])
     print("BRIEF_AUTOMATED_SECONDS",round(elapsed,3))
