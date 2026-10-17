@@ -12,6 +12,7 @@ import re
 import time
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -93,6 +94,32 @@ def fetch_pmid(pmid):
     if len(original)!=1:
         raise LookupError("Original PubMed record not uniquely resolved")
     return original[0]
+
+def fetch_ncbi_trial_registrations(pmid):
+    """Free NCBI PubMed XML databank metadata, not publisher article full text."""
+    params=urllib.parse.urlencode({"db":"pubmed","id":pmid,"retmode":"xml"})
+    endpoint="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"+params
+    req=urllib.request.Request(endpoint,
+        headers={"User-Agent":"PublicOncologyResearchTrialIdentityAudit/1.0"})
+    with urllib.request.urlopen(req,timeout=30) as response:
+        root=ET.fromstring(response.read())
+    result=set()
+    for bank in root.findall(".//DataBankList/DataBank"):
+        name=norm(bank.findtext("DataBankName")).lower()
+        if name not in ("clinicaltrials.gov","clinical trials.gov"):
+            continue
+        for node in bank.findall(".//AccessionNumber"):
+            candidate=norm(node.text).upper()
+            if NCT.fullmatch(candidate):
+                result.add(candidate)
+    # Some PubMed records encode trial IDs as specialized identifiers.
+    for node in root.findall(".//ArticleIdList/ArticleId"):
+        if "clinicaltrials" in (node.get("IdType","")).lower():
+            candidate=norm(node.text).upper()
+            if NCT.fullmatch(candidate):
+                result.add(candidate)
+    return sorted(result)
+
 
 def evaluate_source(seed, record):
     """Source identity + number-token audit, NOT adjudicated result extraction."""
@@ -210,6 +237,24 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
         try:
             record=fetch_pmid(study["pmid"])
             result=evaluate_source(study,record)
+            if not result["checks"]["nct_found_in_abstract"]:
+                # Original PubMed's ClinicalTrials.gov databank registration
+                # is a separate evidence tier from an abstract citation.
+                try:
+                    registrations=fetch_ncbi_trial_registrations(study["pmid"])
+                    verified=study["nct"] in registrations
+                    result["checks"]["nct_found_in_pubmed_databank"]=verified
+                    result["registration_verification_source"]=(
+                        "NCBI_PUBMED_CLINICALTRIALS_DATABANK" if verified else
+                        "PENDING_SOURCE_REVIEW")
+                    if verified and all(result["checks"][k] for k in (
+                        "pubmed_identity","estimate_number_token_found",
+                        "ci_level","ci_lower","ci_upper")):
+                        result["verification_status"]=(
+                            "ABSTRACT_NUMBERS_AND_NCBI_REGISTRY_LOCATED_REVIEW_REQUIRED")
+                except (OSError,ET.ParseError,ValueError,TimeoutError):
+                    result["checks"]["nct_found_in_pubmed_databank"]=False
+                    result["registration_verification_source"]="NCBI_METADATA_FETCH_FAILED"
         except (LookupError,OSError,ValueError,TimeoutError) as exc:
             result={"key":study["key"],"pmid":study["pmid"],
                     "verification_status":"SOURCE_FETCH_OR_RESOLUTION_FAILED",
@@ -227,6 +272,9 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
       "abstract_token_checks_passed":sum(
           r["verification_status"]=="ABSTRACT_NUMBER_TOKENS_LOCATED_REVIEW_REQUIRED"
           for r in results),
+      "abstract_number_plus_pubmed_registry_checks_passed":sum(
+          r["verification_status"]=="ABSTRACT_NUMBERS_AND_NCBI_REGISTRY_LOCATED_REVIEW_REQUIRED"
+          for r in results),
       "statistically_validated_outcome_count":0,
       "expert_adjudicated_outcome_count":0,
       "scientific_accuracy_unmeasured":True,
@@ -242,6 +290,7 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
     print("REFERENCE_UNIQUE_FAMILIES",len(seed["studies"]))
     print("REFERENCE_PUBMED_CHECKS",payload["source_checks_completed"])
     print("REFERENCE_ABSTRACT_TOKENS_LOCATED",payload["abstract_token_checks_passed"])
+    print("REFERENCE_ADDITIONAL_NCBI_REGISTRATIONS",payload["abstract_number_plus_pubmed_registry_checks_passed"])
     print("REFERENCE_RUNTIME_SECONDS",round(elapsed,3))
     return payload
 
