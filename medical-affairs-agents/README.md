@@ -95,3 +95,25 @@ For precise failure notes, evaluation definitions, and a reviewer annotation tem
 - **Do not conflate green CI with scientific validation.** A 113/113 software result means safety properties of synthetic tests were met, not 100% clinical accuracy. No licensed corporate content or paid API is used.
 
 The next scientific work needs a clinician-reviewed and trial-family-disjoint outcome/harms gold standard, then end-to-end precision, recall, unsupported citation rate, and human review-time benchmarking. Corporate entitlements can later be pluggable via an approved private connector without weakening the scientific review gate.
+
+
+### ADC provisional development references — October 2026
+
+Step 1 of the clinical evidence accuracy project now has **10 independent original breast-cancer ADC parent-study families** across Dato-DXd, T-DXd, and sacituzumab govitecan. See [the structured development reference registry](benchmarks/ADC_REFERENCE_CANDIDATES_V1.json), [the public source-audit script](adc_reference_dataset.py), and [the two-reviewer worksheet generator](adc_reviewer_worksheet.py).
+
+- **Latest live run:** [Public Breast ADC Reference Dataset Audit](https://github.com/LidaMirzaei/Healthcare-AI-Portfolio/actions/runs/39012663227) — **133/133** offline tests passed, **10/10** PubMed source records retrieved and checked for original PMID/DOI and numeric tokens; **9/10** candidate parent-study registrations located using source abstract or independent NCBI PubMed ClinicalTrials.gov databank metadata.
+- **Still flagged:** TROPION-Breast02 has its original PubMed numeric data present but automated NCT linkage incomplete. The [FDA approval summary](https://www.fda.gov/drugs/resources-information-approved-drugs/fda-approves-datopotamab-deruxtecan-dlnk-unresectable-or-metastatic-triple-negative-breast-cancer) independently identifies it as NCT05374512; that is a **separate cross-reference**, not a manufactured PubMed metadata match.
+- **Three artifact files:** the human-readable candidate reference brief, source metadata/number-token audit JSON, and an **unfilled** worksheet for two independent expert reviewers across all 10 study families. The artifact name is **provisional-adc-reference-packet-not-gold**.
+- **Development data, not unseen evaluation:** these 10 studied families may be used for exploratory engineering and reviewer annotation. They must **not** be counted as a new independent holdout after inspection. The previous V2/V3 holdouts remain unchanged.
+- **Scientific validity:** 0 independently adjudicated labels, 0 medically approved treatment claims, **no real clinical precision/recall estimate**. Abstract number-token presence is a provenance aid, not proof of treatment-effect attribution or valid methodology.
+- **Statistical guardrails:** TROPION-Breast02 PFS reports a **99%** CI, DESTINY-Breast04's selected 0.51 HR is for the HR-positive HER2-low subgroup without CI limits in the selected abstract, DESTINY-Breast05 studies early post-neoadjuvant iDFS and has a later erratum, and BEGONIA arm 6 is single-arm with a response objective not met.
+- **Rights:** this collection fetches public PubMed bibliographic metadata and abstracts for automated checks but **does not export copied abstracts or publisher full texts**. Restricted enterprise/publisher content is never routed through public GitHub. No paid models/APIs.
+
+**To repeat the authorized public development-source check:**
+
+    python -m unittest discover -s medical-affairs-agents -p "test_*.py" -v
+    python medical-affairs-agents/adc_reference_dataset.py
+    python medical-affairs-agents/adc_reviewer_worksheet.py
+
+**Next rigorous step:** two qualified reviewers independently annotate endpoints, intervention/control arms, confidence interval level, population, harms, methods and limitations from original permitted full text; adjudicate disagreements; then evaluate on **fresh study-family-disjoint unseen sources**. See [gold evaluation guide](benchmarks/TWO_REVIEWER_GOLD_EVALUATION_GUIDE.md).
+
