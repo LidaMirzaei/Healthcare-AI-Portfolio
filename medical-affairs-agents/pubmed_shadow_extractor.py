@@ -24,6 +24,16 @@ RATIO=re.compile(
     r"\s*[,;:=]?\s*"
     r"(?P<point>\d+(?:\.\d{1,5})?)\b",re.I
 )
+# A dose in "hazard ratio for camizestrant 75 mg versus ... was 0.59"
+# is NOT the numerical HR. Require a named active comparator followed by
+# "was/is/of <number>" to bind the actual effect rather than dose.
+DOSE_COMPARATOR_RATIO=re.compile(
+    r"\b(?P<measure>hazard\s+ratio|odds\s+ratio)\s+for\s+"
+    r"(?=[^;\.]{0,120}\b(?:versus|vs\.?)\b)"
+    r"[^;\.]{1,120}?\s+(?:was|is|of)\s*"
+    r"(?P<point>\d+(?:\.\d{1,5})?)\b",re.I
+)
+
 INTERVAL=re.compile(
     r"\b(?P<level>90(?:\.\d{1,2})?|95(?:\.\d{1,2})?|99(?:\.\d{1,2})?)"
     r"\s*%\s*(?:(?:confidence\s+interval)(?:\s*[\(\[]\s*CI\s*[\)\]])?|\bCI\b)"
@@ -91,7 +101,12 @@ def contextual_endpoint(results, ratio_start):
 
 def ratio_effects(results):
     """Parse independent HR/OR expressions and locally attached CIs."""
-    ratios=list(RATIO.finditer(results))
+    dose_bound=list(DOSE_COMPARATOR_RATIO.finditer(results))
+    # Suppress shorter generic regex hits whose point estimate was actually
+    # part of an explicitly parsed treatment-dose/comparator phrase.
+    ordinary=[m for m in RATIO.finditer(results)
+              if not any(d.start()<=m.start()<d.end() for d in dose_bound)]
+    ratios=sorted(dose_bound+ordinary,key=lambda m:m.start())
     cis=list(INTERVAL.finditer(results))
     accepted, abstained=[],[]
     for i,ratio in enumerate(ratios):
