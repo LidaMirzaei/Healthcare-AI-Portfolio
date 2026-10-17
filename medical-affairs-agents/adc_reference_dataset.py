@@ -394,6 +394,12 @@ def run(seed_path=DEFAULT_SEED, dest="medical-affairs-agents/output/adc_referenc
     print("REFERENCE_LOCAL_EFFECT_PLUS_NCBI_REGISTRY",payload["strict_local_effect_plus_pubmed_registry_checks_passed"])
     print("REFERENCE_METADATA_FALLBACK_REQUESTS",fallback_count)
     print("REFERENCE_RUNTIME_SECONDS",round(elapsed,3))
+    # A green workflow must not hide an original PMID or DOI mismatch.
+    # Numeric/endpoints/registration uncertainties remain review warnings.
+    if payload["source_pmid_doi_matches"] != len(seed["studies"]):
+        raise RuntimeError(
+            "Original source identity incomplete; review audit. "
+            "Evidence packet NOT released as verified.")
     return payload
 
 if __name__=="__main__":
