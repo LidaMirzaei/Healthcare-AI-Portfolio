@@ -88,13 +88,24 @@ def markdown(docs):
             "Figures, supplementary files, and tables are not comprehensively analyzed."]
     return "\n".join(lines)+"\n"
 
+def authorized_xml_for_public_demo(xml):
+    """Fail closed on full-text public commercial-intent mining rights."""
+    from independent_holdout import license_classification
+    root=ET.fromstring(xml)
+    return license_classification(root)["status"] == "CC_BY_OR_CC0_CONFIRMED"
+
+
 def run(query, limit, target):
     results=[]
     for item in search(query,limit):
         pmcid=item.get("pmcid")
         if not pmcid: continue
         try:
-            results.append(evidence(parse_xml(fetch(BASE+"/"+pmcid+"/fullTextXML"),pmcid)))
+            article_xml=fetch(BASE+"/"+pmcid+"/fullTextXML")
+            if not authorized_xml_for_public_demo(article_xml):
+                print("Skipped restricted/unknown-license full text",pmcid)
+                continue
+            results.append(evidence(parse_xml(article_xml,pmcid)))
         except (OSError,ET.ParseError,ValueError) as exc:
             print("Skipped",pmcid,str(exc))
     if not results:
