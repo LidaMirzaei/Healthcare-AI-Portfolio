@@ -14,6 +14,11 @@ on:
       - 'medical-affairs-agents/test_source_gated_brief.py'
       - 'medical-affairs-agents/final_os_source_check.py'
       - 'medical-affairs-agents/test_final_os_source_check.py'
+      - 'medical-affairs-agents/independent_holdout.py'
+      - 'medical-affairs-agents/test_independent_holdout.py'
+      - 'medical-affairs-agents/content_access.py'
+      - 'medical-affairs-agents/test_content_access.py'
+      - 'medical-affairs-agents/benchmarks/INDEPENDENT_HOLDOUT_V1.json'
       - '.github/workflows/pinned-breast-trial-review.yml'
 
 permissions:
@@ -40,9 +45,13 @@ jobs:
         run: python medical-affairs-agents/final_os_source_check.py
       - name: Build strictly source-gated executive brief and table audit
         run: python medical-affairs-agents/source_gated_brief.py
+      - name: Evaluate frozen independent-trial holdout
+        run: python medical-affairs-agents/independent_holdout.py
       - name: Upload evidence extraction and measured runtime
         uses: actions/upload-artifact@v4
         with:
           name: pinned-breast-trial-evidence-and-timing
-          path: medical-affairs-agents/output/pinned_trial/
+          path: |
+            medical-affairs-agents/output/pinned_trial/
+            medical-affairs-agents/output/independent_holdout/
           retention-days: 14
