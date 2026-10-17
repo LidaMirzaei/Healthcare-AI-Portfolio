@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "name": "V5 prospective public-abstract source-shadow evaluation — NOT clinician gold",
+  "created_date": "2026-10-17",
+  "frozen_before_extractor_run": true,
+  "status": "PUBLIC_ORIGINAL_ABSTRACT_ASSISTANT_SPOTCHECK_NOT_MEDICAL_GOLD",
+  "data_partition": "UNSEEN_FAMILY_AT_FIRST_SHADOW_RUN_SUBSEQUENTLY_CONSUMED",
+  "source_scope": "Only PubMed/Europe PMC publicly retrievable original abstract results; no restricted full text; not clinical context validated.",
+  "training_families": [
+    "NCT05104866",
+    "NCT05374512",
+    "NCT03529110",
+    "NCT03734029",
+    "NCT04622319",
+    "NCT04494425",
+    "NCT04784715",
+    "NCT02574455",
+    "NCT03901339",
+    "NCT03742102"
+  ],
+  "reserved_v4_families_excluded": [
+    "NCT05382286",
+    "NCT04739761",
+    "NCT04964934",
+    "NCT04305496",
+    "NCT02947685",
+    "NCT04191499"
+  ],
+  "studies": [
+    {
+      "trial": "OptiTROP-Breast01",
+      "nct": "NCT05347134",
+      "pmid": "40217078",
+      "doi": "10.1038/s41591-025-03630-w",
+      "population": "previously treated metastatic TNBC",
+      "design": "randomized phase III",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/40217078/",
+      "expected": [
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.32,
+          "ci_level": 95,
+          "ci_lower": 0.24,
+          "ci_upper": 0.44,
+          "scope": "final PFS by BICR"
+        },
+        {
+          "endpoint": "OS",
+          "measure": "HR",
+          "estimate": 0.53,
+          "ci_level": 95,
+          "ci_lower": 0.36,
+          "ci_upper": 0.78,
+          "scope": "interim OS (not mature final OS)"
+        }
+      ]
+    },
+    {
+      "trial": "CAPItello-290",
+      "nct": "NCT03997123",
+      "pmid": "41422862",
+      "doi": "10.1016/j.annonc.2025.12.012",
+      "population": "first-line metastatic TNBC",
+      "design": "randomized phase III",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/41422862/",
+      "expected": [
+        {
+          "endpoint": "OS",
+          "measure": "HR",
+          "estimate": 0.92,
+          "ci_level": 95,
+          "ci_lower": 0.78,
+          "ci_upper": 1.08,
+          "scope": "overall population, primary OS, final analysis"
+        },
+        {
+          "endpoint": "OS",
+          "measure": "HR",
+          "estimate": 1.05,
+          "ci_level": 95,
+          "ci_lower": 0.77,
+          "ci_upper": 1.43,
+          "scope": "PIK3CA/AKT1/PTEN altered subgroup, primary OS, final"
+        },
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.72,
+          "ci_level": 95,
+          "ci_lower": 0.61,
+          "ci_upper": 0.84,
+          "scope": "overall population, secondary PFS, distinct cutoff"
+        },
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.7,
+          "ci_level": 95,
+          "ci_lower": 0.52,
+          "ci_upper": 0.95,
+          "scope": "PIK3CA/AKT1/PTEN altered subgroup, secondary PFS"
+        }
+      ],
+      "critical_interpretation": "Neither primary OS endpoint met prespecified statistical boundary, regardless of PFS HRs. Do NOT claim an OS win."
+    },
+    {
+      "trial": "EMBER-3 primary",
+      "nct": "NCT04975308",
+      "pmid": "39660834",
+      "doi": "10.1056/NEJMoa2410858",
+      "population": "advanced ER+/HER2-, 3-arm, ESR1 mutant versus overall populations",
+      "design": "randomized phase III",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/39660834/",
+      "expected": [
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.87,
+          "ci_level": 95,
+          "ci_lower": 0.72,
+          "ci_upper": 1.04,
+          "scope": "imlunestrant versus standard therapy in all patients; P=0.12"
+        },
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.57,
+          "ci_level": 95,
+          "ci_lower": 0.44,
+          "ci_upper": 0.73,
+          "scope": "imlunestrant + abemaciclib versus imlunestrant; 426 simultaneously randomized patients"
+        }
+      ],
+      "critical_interpretation": "The overall-population imlunestrant-versus-standard PFS result was not significant, even though the combination arm result was positive. ESR1-mutant primary reported restricted mean survival rather than a direct HR in this abstract."
+    },
+    {
+      "trial": "ASCENT-03",
+      "nct": "NCT05382299",
+      "pmid": "41124233",
+      "doi": "10.1056/NEJMoa2511734",
+      "population": "first-line advanced TNBC not eligible for checkpoint inhibitors",
+      "design": "randomized phase III",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/41124233/",
+      "expected": [
+        {
+          "endpoint": "PFS",
+          "measure": "HR",
+          "estimate": 0.62,
+          "ci_level": 95,
+          "ci_lower": 0.5,
+          "ci_upper": 0.77,
+          "scope": "PFS BICR sacituzumab govitecan versus chemotherapy"
+        }
+      ]
+    }
+  ],
+  "gates": {
+    "rule": "The predictor must read only PMIDs and the PubMed metadata/abstract returned by its independent connector, never any expected endpoint numbers/CI from this manifest.",
+    "metrics": "Report tuple-level recall, all candidate count, spurious candidate count, abstentions, study coverage, source identity, actual negative-control guard. NOT clinical precision or full-review accuracy.",
+    "cannot_assess": [
+      "real independent reviewer expertise",
+      "Methods/harms coverage",
+      "correct comparator/arm/subgroup mapping",
+      "true source publisher table anchors",
+      "real clinical precision/recall",
+      "patient treatment decisions"
+    ],
+    "one_time": "V5 can only be genuinely unseen once; subsequent reruns are regression/development, not new external validation."
+  }
+}
